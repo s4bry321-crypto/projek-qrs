@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
+import SalesChart from '../../components/SalesChart';
 import { supabase } from '../../lib/supabase';
 import { Order } from '../../types';
 import { TrendingUp, ShoppingBag, CheckCircle } from 'lucide-react';
@@ -100,6 +101,14 @@ export default function AdminDashboard() {
             <p className="text-2xl font-bold text-gray-900">{pesananAktif}</p>
           </div>
         </div>
+      </div>
+
+      <div className="mb-8">
+        <SalesChart
+          data={orders.filter(o => o.status === 'dibayar').map(o => ({ date: o.waktu, value: o.total_harga }))}
+          title="Grafik Pendapatan"
+          valueLabel="Pendapatan"
+        />
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">

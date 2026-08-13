@@ -276,8 +276,12 @@ export default function SuperAdminSellers() {
                   Baru
                 </div>
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center text-orange-500 shadow-sm">
-                    <Store size={24} />
+                  <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center text-orange-500 shadow-sm overflow-hidden shrink-0">
+                    {seller.logo_url ? (
+                      <img src={seller.logo_url} alt={seller.nama_restoran} className="w-full h-full object-cover" />
+                    ) : (
+                      <Store size={24} />
+                    )}
                   </div>
                   <div>
                     <h3 className="font-bold text-slate-900 text-lg leading-tight">{seller.nama_restoran}</h3>
@@ -324,8 +328,19 @@ export default function SuperAdminSellers() {
                   otherSellers.map((seller) => (
                     <tr key={seller.id} className="hover:bg-slate-50">
                       <td className="p-4">
-                        <div className="font-semibold text-slate-900">{seller.nama_restoran}</div>
-                        <div className="text-xs text-slate-500">{seller.id}</div>
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center overflow-hidden shrink-0">
+                            {seller.logo_url ? (
+                              <img src={seller.logo_url} alt={seller.nama_restoran} className="w-full h-full object-cover" />
+                            ) : (
+                              <Store size={16} className="text-slate-400" />
+                            )}
+                          </div>
+                          <div>
+                            <div className="font-semibold text-slate-900">{seller.nama_restoran}</div>
+                            <div className="text-xs text-slate-500">{seller.id}</div>
+                          </div>
+                        </div>
                       </td>
                       <td className="p-4">
                         <span className="text-slate-600 font-mono text-xs px-2 py-1 bg-slate-100 rounded">

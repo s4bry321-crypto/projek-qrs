@@ -1,10 +1,10 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { LayoutDashboard, UtensilsCrossed, MonitorStop, LogOut, Users } from 'lucide-react';
+import { LayoutDashboard, UtensilsCrossed, MonitorStop, LogOut, Users, Store, QrCode } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { signOut, userProfile } = useAuth();
+  const { signOut, userProfile, sellerData } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -17,6 +17,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: 'Kelola Menu', path: '/admin/menu', icon: <UtensilsCrossed size={20} /> },
     { name: 'Kelola Meja', path: '/admin/tables', icon: <MonitorStop size={20} /> },
     { name: 'Kelola Kasir', path: '/admin/cashier', icon: <Users size={20} /> },
+    { name: 'Profil Bisnis', path: '/admin/profile', icon: <Store size={20} /> },
+    { name: 'Cetak QR', path: '/admin/qr', icon: <QrCode size={20} /> },
   ];
 
   return (
@@ -24,7 +26,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Sidebar */}
       <aside className="w-64 bg-gray-900 text-white flex flex-col fixed inset-y-0 left-0">
         <div className="p-6 border-b border-gray-800">
-          <h1 className="text-2xl font-bold text-white">Admin Panel</h1>
+          <div className="flex items-center gap-3 mb-1">
+            {sellerData?.logo_url && (
+              <img src={sellerData.logo_url} alt="Logo" className="w-9 h-9 rounded-lg object-cover shrink-0" />
+            )}
+            <h1 className="text-xl font-bold text-white truncate">{sellerData?.nama_restoran || 'Admin Panel'}</h1>
+          </div>
           <p className="text-gray-400 text-sm mt-1">{userProfile?.email}</p>
         </div>
         <nav className="flex-1 p-4 space-y-2">

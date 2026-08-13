@@ -18,6 +18,7 @@ import SuperAdminLogin from './pages/superadmin/SuperAdminLogin';
 import SuperAdminDashboard from './pages/superadmin/SuperAdminDashboard';
 import SuperAdminSellers from './pages/superadmin/SuperAdminSellers';
 import SuperAdminPayments from './pages/superadmin/SuperAdminPayments';
+import SuperAdminSettings from './pages/superadmin/SuperAdminSettings';
 
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminRegister from './pages/admin/AdminRegister';
@@ -27,6 +28,8 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import ManageMenu from './pages/admin/ManageMenu';
 import ManageTables from './pages/admin/ManageTables';
 import ManageCashier from './pages/admin/ManageCashier';
+import AdminProfile from './pages/admin/AdminProfile';
+import AdminQR from './pages/admin/AdminQR';
 
 const ProtectedRoute = ({ children, allowedRoles, redirectTo }: { children: React.ReactNode, allowedRoles: string[], redirectTo: string }) => {
   const { userProfile, loading } = useAuth();
@@ -102,6 +105,8 @@ export default function App() {
                     <Route path="/menu" element={<ManageMenu />} />
                     <Route path="/tables" element={<ManageTables />} />
                     <Route path="/cashier" element={<ManageCashier />} />
+                    <Route path="/profile" element={<AdminProfile />} />
+                    <Route path="/qr" element={<AdminQR />} />
                   </Routes>
                 </AdminProtectedRoute>
               } 
@@ -117,6 +122,7 @@ export default function App() {
                     <Route path="/" element={<SuperAdminDashboard />} />
                     <Route path="/sellers" element={<SuperAdminSellers />} />
                     <Route path="/payments" element={<SuperAdminPayments />} />
+                    <Route path="/settings" element={<SuperAdminSettings />} />
                   </Routes>
                 </ProtectedRoute>
               } 

@@ -22,7 +22,9 @@ export default function ManageTables() {
       setErrorMsg('Gagal memuat meja: ' + error.message);
     }
     if (data) {
-      const sortedTables = (data as Table[]).sort((a, b) => parseInt(a.nomor_meja) - parseInt(b.nomor_meja));
+      const sortedTables = (data as Table[]).sort((a, b) => 
+        a.nomor_meja.localeCompare(b.nomor_meja, undefined, { numeric: true, sensitivity: 'base' })
+      );
       setTables(sortedTables);
     }
   };

@@ -88,7 +88,9 @@ export default function MenuPage() {
           return;
         }
         if (data) {
-          const sortedTables = (data as Table[]).sort((a, b) => parseInt(a.nomor_meja) - parseInt(b.nomor_meja));
+          const sortedTables = (data as Table[]).sort((a, b) => 
+            a.nomor_meja.localeCompare(b.nomor_meja, undefined, { numeric: true, sensitivity: 'base' })
+          );
           setTables(sortedTables);
         }
       } catch (err: any) {
@@ -187,16 +189,35 @@ export default function MenuPage() {
     <div className="min-h-screen bg-gray-50 pb-24">
       {/* Header */}
       <header className="bg-white shadow-sm sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div>
-            <h1 className="text-xl font-bold text-gray-900">{seller.nama_restoran}</h1>
-            <p className="text-sm text-gray-500">Meja: {tableNumber}</p>
+        <div className="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            {seller.logo_url && (
+              <img src={seller.logo_url} alt={seller.nama_restoran} className="w-10 h-10 rounded-lg object-cover shrink-0" />
+            )}
+            <div className="min-w-0">
+              <h1 className="text-xl font-bold text-gray-900 truncate">{seller.nama_restoran}</h1>
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <span>Meja: {tableNumber}</span>
+                <button 
+                  onClick={() => setTableNumber(null)}
+                  className="text-xs text-orange-500 hover:text-orange-700 underline shrink-0"
+                >
+                  Ganti
+                </button>
+              </div>
+            </div>
           </div>
-          <button 
-            onClick={() => setTableNumber(null)}
-            className="text-xs text-orange-500 hover:text-orange-700 underline"
+          <button
+            onClick={() => navigate(`/r/${slug}/cart`)}
+            className="relative p-2 text-gray-700 hover:text-orange-500 transition-colors shrink-0"
+            aria-label="Lihat keranjang"
           >
-            Ganti Meja
+            <ShoppingCart size={26} />
+            {totalItems > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 bg-orange-500 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                {totalItems}
+              </span>
+            )}
           </button>
         </div>
         
@@ -229,7 +250,7 @@ export default function MenuPage() {
         {loading ? (
           <div className="text-center py-10 text-gray-500">Memuat menu...</div>
         ) : filteredMenu.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
             {filteredMenu.map(item => (
               <MenuCard key={item.id} item={item} />
             ))}

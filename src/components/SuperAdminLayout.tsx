@@ -1,11 +1,21 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { LayoutDashboard, LogOut, Store, CreditCard } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { LayoutDashboard, LogOut, Store, CreditCard, Settings } from 'lucide-react';
 
 export default function SuperAdminLayout({ children }: { children: React.ReactNode }) {
   const { signOut, userProfile } = useAuth();
   const navigate = useNavigate();
+  const [platformLogo, setPlatformLogo] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchLogo = async () => {
+      const { data } = await supabase.from('platform_settings').select('logo_url').eq('id', 1).maybeSingle();
+      if (data?.logo_url) setPlatformLogo(data.logo_url);
+    };
+    fetchLogo();
+  }, []);
 
   const handleLogout = async () => {
     await signOut();
@@ -16,13 +26,19 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
     { name: 'Dashboard', path: '/superadmin', icon: <LayoutDashboard size={20} /> },
     { name: 'Restoran', path: '/superadmin/sellers', icon: <Store size={20} /> },
     { name: 'Pembayaran', path: '/superadmin/payments', icon: <CreditCard size={20} /> },
+    { name: 'Pengaturan', path: '/superadmin/settings', icon: <Settings size={20} /> },
   ];
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <aside className="w-64 bg-slate-900 text-white flex flex-col fixed inset-y-0 left-0">
         <div className="p-6 border-b border-slate-800">
-          <h1 className="text-2xl font-bold text-white text-orange-500">Super Admin</h1>
+          <div className="flex items-center gap-3 mb-1">
+            {platformLogo && (
+              <img src={platformLogo} alt="Logo" className="w-9 h-9 rounded-lg object-cover shrink-0" />
+            )}
+            <h1 className="text-2xl font-bold text-white text-orange-500">Super Admin</h1>
+          </div>
           <p className="text-slate-400 text-sm mt-1">{userProfile?.email}</p>
         </div>
         

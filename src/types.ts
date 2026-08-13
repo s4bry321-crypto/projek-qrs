@@ -46,6 +46,7 @@ export interface Seller {
   slug: string;
   status: 'aktif' | 'nonaktif' | 'pending' | 'ditolak';
   masa_aktif_sampai?: string;
+  logo_url?: string;
 }
 
 export interface Payment {
@@ -64,4 +65,5 @@ export interface UserProfile {
   role: 'admin' | 'kasir' | 'super_admin';
   seller_id?: string;
   status?: 'aktif' | 'nonaktif';
+  foto_url?: string;
 }

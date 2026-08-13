@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import SuperAdminLayout from '../../components/SuperAdminLayout';
+import SalesChart from '../../components/SalesChart';
 import { supabase } from '../../lib/supabase';
 import { Seller, Payment } from '../../types';
 import { Plus, X } from 'lucide-react';
@@ -172,6 +173,16 @@ export default function SuperAdminPayments() {
               </button>
             </div>
           </form>
+        </div>
+      )}
+
+      {!loading && payments.length > 0 && (
+        <div className="mb-8">
+          <SalesChart
+            data={payments.map(p => ({ date: p.tanggal, value: p.jumlah }))}
+            title="Grafik Penghasilan Platform"
+            valueLabel="Penghasilan"
+          />
         </div>
       )}
 

@@ -2,8 +2,9 @@ import React, { useEffect, useState, useRef } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Order } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
-import { Bell, Printer, LogOut, Check, ArrowRight } from 'lucide-react';
+import { Bell, Printer, LogOut, Check, ArrowRight, Camera } from 'lucide-react';
 import { format } from 'date-fns';
+import { uploadProfilAsset } from '../../lib/uploadImage';
 
 export default function CashierDashboard() {
   const { signOut, userProfile, sellerData } = useAuth();
@@ -11,6 +12,23 @@ export default function CashierDashboard() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showNewOrderBanner, setShowNewOrderBanner] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !userProfile) return;
+    setIsUploadingPhoto(true);
+    try {
+      const url = await uploadProfilAsset(file);
+      const { error } = await supabase.from('profiles').update({ foto_url: url }).eq('id', userProfile.id);
+      if (error) throw new Error(error.message);
+      window.location.reload();
+    } catch (err: any) {
+      alert('Gagal mengupload foto profil: ' + err.message);
+      setIsUploadingPhoto(false);
+    }
+  };
 
   const playNewOrderSound = () => {
     try {
@@ -92,6 +110,10 @@ export default function CashierDashboard() {
         alert(`Gagal mengupdate status pesanan: ${error.message}`);
         return;
       }
+
+      // Update tampilan langsung (optimistic) - tidak perlu nunggu realtime/refresh manual
+      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+      setSelectedOrder(prev => (prev && prev.id === orderId ? { ...prev, status: newStatus } : prev));
       
       // If status is dibayar, set table back to kosong
       if (newStatus === 'dibayar') {
@@ -124,9 +146,31 @@ export default function CashierDashboard() {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <header className="bg-white shadow-sm px-6 py-4 flex justify-between items-center print:hidden">
-        <div>
-          <h1 className="text-xl font-bold text-gray-900">Dashboard Kasir</h1>
-          <p className="text-sm text-gray-500">Masuk sebagai: {userProfile?.email}</p>
+        <div className="flex items-center gap-3">
+          <div className="relative group shrink-0">
+            <div className="w-11 h-11 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
+              {userProfile?.foto_url ? (
+                <img src={userProfile.foto_url} alt="Foto profil" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-gray-500 font-bold text-sm">
+                  {(userProfile?.nama || userProfile?.email || '?').charAt(0).toUpperCase()}
+                </span>
+              )}
+            </div>
+            <button
+              onClick={() => photoInputRef.current?.click()}
+              disabled={isUploadingPhoto}
+              className="absolute -bottom-1 -right-1 w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition disabled:opacity-100"
+              title="Ganti foto profil"
+            >
+              <Camera size={11} />
+            </button>
+            <input ref={photoInputRef} type="file" accept="image/*" onChange={handlePhotoChange} className="hidden" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-gray-900">Dashboard Kasir</h1>
+            <p className="text-sm text-gray-500">Masuk sebagai: {userProfile?.email}</p>
+          </div>
         </div>
         <button onClick={signOut} className="text-gray-500 hover:text-red-500 flex items-center gap-2">
           <LogOut size={20} />
