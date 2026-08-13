@@ -60,7 +60,27 @@ Klik **Deploy**. Tunggu sampai selesai, lalu buka link yang diberikan Vercel.
 
 ---
 
-## Alur Peran (ringkasan)
+## BAGIAN 4 — Dapatkan Aplikasi Android (.apk)
+
+Project ini sudah disiapkan supaya **GitHub yang otomatis build file .apk-nya** setiap kali kamu push — tidak perlu Android Studio atau komputer sama sekali.
+
+### 4.1 Tambahkan Secrets di GitHub (sekali saja)
+Di repo GitHub: **Settings > Secrets and variables > Actions > New repository secret**, tambahkan dua secret ini (nilainya sama dengan yang dipakai di Vercel):
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_ANON_KEY`
+
+### 4.2 Jalankan build
+Build otomatis jalan tiap kali ada push ke branch `main`. Untuk menjalankan manual: buka tab **Actions** di repo GitHub, pilih workflow **Build APK Android**, klik **Run workflow**.
+
+### 4.3 Download APK
+Tunggu sampai selesai (beberapa menit, ada tanda centang hijau), lalu buka halaman run tersebut, scroll ke bagian **Artifacts**, download **sistem-pesan-qr-apk**. Isinya file `app-debug.apk` — itu file aplikasinya, tinggal dipindah ke HP dan diinstall (aktifkan dulu "Izinkan install dari sumber tidak dikenal" di pengaturan HP kalau diminta).
+
+> Ini APK versi "debug" (belum ditandatangani untuk rilis resmi) — cukup untuk dipakai sendiri atau dibagikan ke tim. Kalau nanti mau publish ke Google Play Store, perlu langkah tambahan (signing release + akun Play Console) yang bisa dikerjakan belakangan.
+
+### 4.4 Juga bisa "diinstall" langsung dari browser (PWA)
+Selain APK, website ini sekarang juga bisa langsung di-"Add to Home Screen" / "Install app" dari Chrome tanpa perlu file apapun — cocok buat Pelanggan yang cuma scan QR sekali dan tidak perlu install aplikasi penuh.
+
+
 
 - **Pelanggan**: `/r/{slug-restoran}` — scan QR khusus restoran tsb, pilih meja, pesan.
 - **Admin**: daftar sendiri di `/admin/register`, menunggu persetujuan Super Admin, lalu kelola menu/meja/kasir di `/admin`.

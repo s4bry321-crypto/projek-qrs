@@ -9,7 +9,31 @@ export default function CashierDashboard() {
   const { signOut, userProfile, sellerData } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [showNewOrderBanner, setShowNewOrderBanner] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
+
+  const playNewOrderSound = () => {
+    try {
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      const ctx = new AudioContextClass();
+      const playBeep = (startTime: number) => {
+        const oscillator = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(ctx.destination);
+        oscillator.frequency.value = 880;
+        oscillator.type = 'sine';
+        gainNode.gain.setValueAtTime(0.3, startTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + 0.3);
+        oscillator.start(startTime);
+        oscillator.stop(startTime + 0.3);
+      };
+      playBeep(ctx.currentTime);
+      playBeep(ctx.currentTime + 0.4);
+    } catch (err) {
+      console.error('Gagal memutar suara notifikasi:', err);
+    }
+  };
 
   useEffect(() => { if (!userProfile?.seller_id) return;
     const fetchOrders = async () => {
@@ -37,7 +61,13 @@ export default function CashierDashboard() {
 
     const channel = supabase
       .channel('orders_channel')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `seller_id=eq.${userProfile.seller_id}` }, () => {
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders', filter: `seller_id=eq.${userProfile.seller_id}` }, () => {
+        playNewOrderSound();
+        setShowNewOrderBanner(true);
+        setTimeout(() => setShowNewOrderBanner(false), 6000);
+        fetchOrders();
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders', filter: `seller_id=eq.${userProfile.seller_id}` }, () => {
         fetchOrders();
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'order_items' }, () => {
@@ -109,9 +139,14 @@ export default function CashierDashboard() {
         <div className="lg:col-span-1 bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col max-h-[calc(100vh-8rem)]">
           <div className="p-4 border-b border-gray-200 bg-gray-50 rounded-t-xl">
             <h2 className="font-bold text-gray-800 flex items-center gap-2">
-              <Bell size={18} className="text-orange-500" /> Pesanan Aktif
+              <Bell size={18} className={`text-orange-500 ${showNewOrderBanner ? 'animate-bounce' : ''}`} /> Pesanan Aktif
             </h2>
           </div>
+          {showNewOrderBanner && (
+            <div className="mx-3 mt-3 p-3 rounded-lg bg-orange-100 text-orange-800 text-sm font-medium text-center animate-pulse">
+              🔔 Pesanan baru masuk!
+            </div>
+          )}
           <div className="flex-1 overflow-y-auto p-2 space-y-2">
             {orders.filter(o => o.status !== 'dibayar').map(order => (
               <div 
