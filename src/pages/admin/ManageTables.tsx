@@ -179,3 +179,21 @@ export default function ManageTables() {
                 </button>
                 <div className="text-2xl font-bold text-gray-900">{table.nomor_meja}</div>
                 <button 
+                  onClick={() => handleToggleStatus(table)}
+                  disabled={isToggling === table.id}
+                  className={`w-full text-xs font-medium py-1.5 rounded-lg transition-colors disabled:opacity-50 ${
+                    table.status === 'kosong'
+                      ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                      : 'bg-red-100 text-red-700 hover:bg-red-200'
+                  }`}
+                >
+                  {isToggling === table.id ? 'Mengubah...' : table.status === 'kosong' ? 'Kosong' : 'Terisi'}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </AdminLayout>
+  );
+}
