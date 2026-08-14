@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import { supabase } from '../../lib/supabase';
 import { Table } from '../../types';
-import { Trash2, Plus, AlertCircle } from 'lucide-react';
+import { Trash2, Plus, AlertCircle, Pencil } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function ManageTables() {
@@ -13,6 +13,9 @@ export default function ManageTables() {
   const [isDeletingTable, setIsDeletingTable] = useState<string | null>(null);
   const [isToggling, setIsToggling] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
+  const [editingTableId, setEditingTableId] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState('');
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
 
   const fetchTables = async () => {
     if (!userProfile?.seller_id) return;
@@ -51,15 +54,23 @@ export default function ManageTables() {
     setIsAdding(true);
     setErrorMsg('');
     try {
-      const { error } = await supabase.from('tables').insert({ 
+      const { data, error } = await supabase.from('tables').insert({ 
         seller_id: userProfile.seller_id,
         nomor_meja: nomorMeja, 
         status: 'kosong' 
-      });
+      }).select().single();
       if (error) {
         console.error('Error adding table:', error);
         setErrorMsg('Gagal menambah meja: ' + error.message);
-      } else {
+      } else if (data) {
+        // Update state lokal langsung - tidak menunggu realtime subscription,
+        // supaya meja baru langsung muncul walau koneksi realtime lambat/gagal.
+        setTables(prev => {
+          const next = [...prev, data as Table];
+          return next.sort((a, b) => 
+            a.nomor_meja.localeCompare(b.nomor_meja, undefined, { numeric: true, sensitivity: 'base' })
+          );
+        });
         setNomorMeja('');
       }
     } catch (err: any) {
@@ -122,6 +133,38 @@ export default function ManageTables() {
     }
   };
 
+  const startEdit = (table: Table) => {
+    setEditingTableId(table.id);
+    setEditValue(table.nomor_meja);
+    setErrorMsg('');
+  };
+
+  const cancelEdit = () => {
+    setEditingTableId(null);
+    setEditValue('');
+  };
+
+  const saveEdit = async (id: string) => {
+    if (!editValue.trim()) return;
+    setIsSavingEdit(true);
+    setErrorMsg('');
+    try {
+      const { error } = await supabase.from('tables').update({ nomor_meja: editValue.trim() }).eq('id', id);
+      if (error) {
+        console.error('Error updating table:', error);
+        setErrorMsg('Gagal mengubah nama meja: ' + error.message);
+      } else {
+        setEditingTableId(null);
+        setEditValue('');
+      }
+    } catch (err: any) {
+      console.error(err);
+      setErrorMsg('Terjadi kesalahan: ' + err.message);
+    } finally {
+      setIsSavingEdit(false);
+    }
+  };
+
   return (
     <AdminLayout>
       <div className="mb-8">
@@ -171,26 +214,67 @@ export default function ManageTables() {
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             {tables.map(table => (
-              <div key={table.id} className="border border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center gap-3 relative group">
-                <button 
-                  onClick={() => handleDeleteTable(table.id)}
-                  disabled={isDeletingTable === table.id}
-                  className="absolute top-2 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50"
-                >
-                  {isDeletingTable === table.id ? <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div> : <Trash2 size={16} />}
-                </button>
-                <div className="text-2xl font-bold text-gray-900">{table.nomor_meja}</div>
-                <button 
-                  onClick={() => handleToggleStatus(table)}
-                  disabled={isToggling === table.id}
-                  className={`w-full text-xs font-medium py-1.5 rounded-lg transition-colors disabled:opacity-50 ${
-                    table.status === 'kosong'
-                      ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                      : 'bg-red-100 text-red-700 hover:bg-red-200'
-                  }`}
-                >
-                  {isToggling === table.id ? 'Mengubah...' : table.status === 'kosong' ? 'Kosong' : 'Terisi'}
-                </button>
+              <div key={table.id} className="border border-gray-200 rounded-xl p-3 flex flex-col gap-2">
+                {editingTableId === table.id ? (
+                  <div className="flex flex-col gap-2">
+                    <input
+                      type="text"
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value)}
+                      autoFocus
+                      className="w-full text-center text-base font-bold border border-blue-300 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <div className="flex gap-1.5">
+                      <button
+                        onClick={() => saveEdit(table.id)}
+                        disabled={isSavingEdit}
+                        className="flex-1 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium py-1.5 rounded-lg transition-colors disabled:opacity-50"
+                      >
+                        {isSavingEdit ? '...' : 'Simpan'}
+                      </button>
+                      <button
+                        onClick={cancelEdit}
+                        className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-medium py-1.5 rounded-lg transition-colors"
+                      >
+                        Batal
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex items-center justify-end gap-1">
+                      <button
+                        onClick={() => startEdit(table)}
+                        className="text-gray-400 hover:text-blue-500 p-1 transition-colors"
+                        title="Edit nama meja"
+                      >
+                        <Pencil size={14} />
+                      </button>
+                      <button 
+                        onClick={() => handleDeleteTable(table.id)}
+                        disabled={isDeletingTable === table.id}
+                        className="text-gray-400 hover:text-red-500 p-1 transition-colors disabled:opacity-50"
+                        title="Hapus meja"
+                      >
+                        {isDeletingTable === table.id ? <div className="w-3.5 h-3.5 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div> : <Trash2 size={14} />}
+                      </button>
+                    </div>
+                    <div className="flex flex-col items-center gap-2 pb-1">
+                      <div className="text-2xl font-bold text-gray-900">{table.nomor_meja}</div>
+                      <button 
+                        onClick={() => handleToggleStatus(table)}
+                        disabled={isToggling === table.id}
+                        className={`w-full text-xs font-medium py-1.5 rounded-lg transition-colors disabled:opacity-50 ${
+                          table.status === 'kosong'
+                            ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                            : 'bg-red-100 text-red-700 hover:bg-red-200'
+                        }`}
+                      >
+                        {isToggling === table.id ? 'Mengubah...' : table.status === 'kosong' ? 'Kosong' : 'Terisi'}
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             ))}
           </div>

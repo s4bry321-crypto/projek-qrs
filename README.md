@@ -10,7 +10,7 @@ Platform pemesanan makanan berbasis QR code, multi-tenant (bisa dipakai banyak r
 Kalau belum punya, buat project baru di [supabase.com](https://supabase.com).
 
 ### 1.2 Jalankan skema database
-Buka **SQL Editor** di dashboard Supabase, jalankan **seluruh isi file** [`supabase/schema.sql`](supabase/schema.sql). Aman dijalankan berkali-kali walau sebagian sudah pernah dijalankan sebelumnya.
+Buka **SQL Editor** di dashboard Supabase, jalankan **seluruh isi file** [`supabase/schema.sql`](supabase/schema.sql). Aman dijalankan berkali-kali walau sebagian sudah pernah dijalankan sebelumnya. File ini juga mengaktifkan **Realtime** untuk tabel `orders`, `order_items`, `tables`, dan `menu_items` — tanpa ini, notifikasi pesanan baru & update status tidak akan muncul otomatis (baru muncul kalau halaman di-refresh).
 
 ### 1.3 Matikan konfirmasi email
 Buka **Authentication > Providers > Email**, pastikan **Confirm email** dalam keadaan **OFF**. Ini wajib — kalau menyala, pendaftaran mandiri Admin/Kasir akan gagal karena mereka belum punya sesi login aktif sampai klik link di email.

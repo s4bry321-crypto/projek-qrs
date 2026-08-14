@@ -192,17 +192,9 @@ export default function ManageMenu() {
 
   return (
     <AdminLayout>
-      <div className="mb-8 flex justify-between items-end">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Kelola Menu</h1>
-          <p className="text-gray-500 mt-2">Atur kategori dan daftar makanan.</p>
-        </div>
-        <button 
-          onClick={handleAddMenuClick}
-          className="bg-orange-500 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 hover:bg-orange-600 transition"
-        >
-          <Plus size={20} /> Tambah Menu
-        </button>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">Kelola Menu</h1>
+        <p className="text-gray-500 mt-2">Atur kategori dan daftar makanan.</p>
       </div>
 
       {errorMsg && (
@@ -244,6 +236,15 @@ export default function ManageMenu() {
 
         {/* Kolom Daftar Menu */}
         <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="p-4 border-b border-gray-100 flex justify-between items-center">
+            <h2 className="text-xl font-bold">Daftar Menu</h2>
+            <button 
+              onClick={handleAddMenuClick}
+              className="bg-orange-500 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 hover:bg-orange-600 transition text-sm"
+            >
+              <Plus size={18} /> Tambah Menu
+            </button>
+          </div>
           <table className="w-full text-left">
             <thead className="bg-gray-50 border-b border-gray-100">
               <tr>

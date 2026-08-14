@@ -145,7 +145,10 @@ export default function CashierDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-      <header className="bg-white shadow-sm px-6 py-4 flex justify-between items-center print:hidden">
+      <header 
+        className="bg-white shadow-sm px-6 py-4 flex justify-between items-center print:hidden"
+        style={{ paddingTop: 'calc(env(safe-area-inset-top) + 1rem)' }}
+      >
         <div className="flex items-center gap-3">
           <div className="relative group shrink-0">
             <div className="w-11 h-11 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">

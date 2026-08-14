@@ -267,3 +267,33 @@ drop policy if exists "super_admin manage payments" on payments;
 create policy "super_admin manage payments" on payments for all using (
   exists (select 1 from profiles where profiles.id = auth.uid() and profiles.role = 'super_admin')
 );
+
+-- ============================================================
+-- REALTIME: aktifkan publikasi perubahan data untuk tabel yang dipakai
+-- fitur real-time (notifikasi pesanan baru, update status, dll).
+-- Tanpa ini, kode subscription di aplikasi tidak akan menerima update
+-- apapun sampai halaman di-refresh manual.
+-- ============================================================
+do $$
+begin
+  alter publication supabase_realtime add table orders;
+exception when duplicate_object then null;
+end $$;
+
+do $$
+begin
+  alter publication supabase_realtime add table order_items;
+exception when duplicate_object then null;
+end $$;
+
+do $$
+begin
+  alter publication supabase_realtime add table tables;
+exception when duplicate_object then null;
+end $$;
+
+do $$
+begin
+  alter publication supabase_realtime add table menu_items;
+exception when duplicate_object then null;
+end $$;

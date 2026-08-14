@@ -25,7 +25,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Top bar - cuma tampil di layar sempit */}
-      <div className="md:hidden fixed top-0 inset-x-0 h-14 bg-gray-900 text-white flex items-center justify-between px-4 z-30 print:hidden">
+      <div 
+        className="md:hidden fixed top-0 inset-x-0 bg-gray-900 text-white flex items-center justify-between px-4 z-30 print:hidden"
+        style={{ paddingTop: 'env(safe-area-inset-top)', height: 'calc(env(safe-area-inset-top) + 3.5rem)' }}
+      >
         <button onClick={() => setIsSidebarOpen(true)} aria-label="Buka menu">
           <Menu size={24} />
         </button>
@@ -47,7 +50,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="p-6 border-b border-gray-800 flex items-start justify-between">
+        <div className="px-6 pb-6 pt-[calc(1.5rem+env(safe-area-inset-top))] md:pt-6 border-b border-gray-800 flex items-start justify-between">
           <div className="min-w-0">
             <div className="flex items-center gap-3 mb-1">
               {sellerData?.logo_url && (
@@ -91,7 +94,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* Main Content */}
-      <main className="md:ml-64 p-4 pt-20 md:p-8 md:pt-8">
+      <main className="md:ml-64 p-4 pt-[calc(env(safe-area-inset-top)+4.5rem)] md:p-8">
         {children}
       </main>
     </div>

@@ -33,7 +33,10 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Top bar - cuma tampil di layar sempit */}
-      <div className="md:hidden fixed top-0 inset-x-0 h-14 bg-slate-900 text-white flex items-center justify-between px-4 z-30">
+      <div 
+        className="md:hidden fixed top-0 inset-x-0 bg-slate-900 text-white flex items-center justify-between px-4 z-30"
+        style={{ paddingTop: 'env(safe-area-inset-top)', height: 'calc(env(safe-area-inset-top) + 3.5rem)' }}
+      >
         <button onClick={() => setIsSidebarOpen(true)} aria-label="Buka menu">
           <Menu size={24} />
         </button>
@@ -54,7 +57,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="p-6 border-b border-slate-800 flex items-start justify-between">
+        <div className="px-6 pb-6 pt-[calc(1.5rem+env(safe-area-inset-top))] md:pt-6 border-b border-slate-800 flex items-start justify-between">
           <div className="min-w-0">
             <div className="flex items-center gap-3 mb-1">
               {platformLogo && (
@@ -99,7 +102,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
         </div>
       </aside>
 
-      <main className="md:ml-64 p-4 pt-20 md:p-8 md:pt-8">
+      <main className="md:ml-64 p-4 pt-[calc(env(safe-area-inset-top)+4.5rem)] md:p-8">
         {children}
       </main>
     </div>
