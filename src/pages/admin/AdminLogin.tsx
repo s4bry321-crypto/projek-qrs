@@ -150,6 +150,13 @@ export default function AdminLogin() {
               Daftar Sekarang
             </Link>
           </p>
+          {import.meta.env.VITE_APP_TARGET === 'staff' && (
+            <p className="text-sm text-gray-500 mt-2">
+              <Link to="/" className="hover:underline">
+                &larr; Masuk sebagai Kasir
+              </Link>
+            </p>
+          )}
         </div>
       </div>
     </div>

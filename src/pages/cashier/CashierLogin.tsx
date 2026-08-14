@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 export default function CashierLogin() {
   const [email, setEmail] = useState('');
@@ -108,6 +108,15 @@ export default function CashierLogin() {
             )}
           </button>
         </form>
+        {import.meta.env.VITE_APP_TARGET === 'staff' && (
+          <div className="mt-6 text-center">
+            <p className="text-sm text-gray-500">
+              <Link to="/" className="hover:underline">
+                &larr; Masuk sebagai Admin
+              </Link>
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
