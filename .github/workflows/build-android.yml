@@ -8,6 +8,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: [staff, superadmin]
     steps:
       - name: Ambil kode dari repo
         uses: actions/checkout@v4
@@ -15,7 +18,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
 
       - name: Install dependency project
         run: npm install
@@ -23,24 +26,25 @@ jobs:
       - name: Install Capacitor
         run: npm install @capacitor/core@latest @capacitor/android@latest @capacitor/cli@latest
 
-      - name: Build aplikasi web
+      - name: Build aplikasi web (target ${{ matrix.target }})
         run: npm run build
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_APP_TARGET: ${{ matrix.target }}
 
-      - name: Siapkan project Android
+      - name: Siapkan project Android (target ${{ matrix.target }})
         run: |
-          if [ ! -d "android" ]; then
-            npx cap add android
-          fi
+          npx cap add android
           npx cap sync android
+        env:
+          APP_TARGET: ${{ matrix.target }}
 
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '21'
+          java-version: '17'
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
@@ -51,8 +55,8 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleDebug
 
-      - name: Upload hasil APK
+      - name: Upload hasil APK (${{ matrix.target }})
         uses: actions/upload-artifact@v4
         with:
-          name: sistem-pesan-qr-apk
+          name: sistem-pesan-qr-${{ matrix.target }}-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk

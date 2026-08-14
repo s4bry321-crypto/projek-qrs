@@ -70,10 +70,16 @@ Di repo GitHub: **Settings > Secrets and variables > Actions > New repository se
 - `VITE_SUPABASE_ANON_KEY`
 
 ### 4.2 Jalankan build
-Build otomatis jalan tiap kali ada push ke branch `main`. Untuk menjalankan manual: buka tab **Actions** di repo GitHub, pilih workflow **Build APK Android**, klik **Run workflow**.
+Build otomatis jalan tiap kali ada push ke branch `main`, dan otomatis menghasilkan **2 APK terpisah**:
+- **sistem-pesan-qr-staff-apk** — buat Admin & Kasir. Membuka aplikasi ini langsung tampil pilihan "Masuk sebagai Admin" atau "Masuk sebagai Kasir" — tidak ada jalan sama sekali menuju halaman login Super Admin.
+- **sistem-pesan-qr-superadmin-apk** — khusus kamu (Super Admin), langsung membuka halaman login Super Admin.
+
+Karena `appId` keduanya beda, dua APK ini bisa diinstall **bersamaan** di HP yang sama tanpa bentrok — aman dipasang di HP kasir/admin restoran DAN HP kamu sendiri.
+
+Untuk menjalankan manual: buka tab **Actions** di repo GitHub, pilih workflow **Build APK Android**, klik **Run workflow**.
 
 ### 4.3 Download APK
-Tunggu sampai selesai (beberapa menit, ada tanda centang hijau), lalu buka halaman run tersebut, scroll ke bagian **Artifacts**, download **sistem-pesan-qr-apk**. Isinya file `app-debug.apk` — itu file aplikasinya, tinggal dipindah ke HP dan diinstall (aktifkan dulu "Izinkan install dari sumber tidak dikenal" di pengaturan HP kalau diminta).
+Tunggu sampai selesai, buka halaman run tersebut, scroll ke bagian **Artifacts** — ada 2 file, download yang sesuai kebutuhan.
 
 > Ini APK versi "debug" (belum ditandatangani untuk rilis resmi) — cukup untuk dipakai sendiri atau dibagikan ke tim. Kalau nanti mau publish ke Google Play Store, perlu langkah tambahan (signing release + akun Play Console) yang bisa dikerjakan belakangan.
 

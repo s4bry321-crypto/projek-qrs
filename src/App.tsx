@@ -30,6 +30,7 @@ import ManageTables from './pages/admin/ManageTables';
 import ManageCashier from './pages/admin/ManageCashier';
 import AdminProfile from './pages/admin/AdminProfile';
 import AdminQR from './pages/admin/AdminQR';
+import AppHome from './pages/AppHome';
 
 const ProtectedRoute = ({ children, allowedRoles, redirectTo }: { children: React.ReactNode, allowedRoles: string[], redirectTo: string }) => {
   const { userProfile, loading } = useAuth();
@@ -73,7 +74,7 @@ export default function App() {
             <Route path="/r/:slug" element={<MenuPage />} />
             <Route path="/r/:slug/cart" element={<CartPage />} />
             <Route path="/r/:slug/order/:orderId" element={<OrderStatusPage />} />
-            <Route path="/" element={<div className="min-h-screen flex items-center justify-center text-gray-500">Silakan scan QR Code restoran untuk memesan.</div>} />
+            <Route path="/" element={<AppHome />} />
 
             {/* Cashier Routes */}
             <Route path="/cashier/login" element={<CashierLogin />} />
