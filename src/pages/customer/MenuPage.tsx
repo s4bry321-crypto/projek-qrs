@@ -3,7 +3,7 @@ import { supabase } from '../../lib/supabase';
 import { Category, MenuItem, Table, Seller } from '../../types';
 import { useCart } from '../../contexts/CartContext';
 import MenuCard from '../../components/MenuCard';
-import { ShoppingCart, Search } from 'lucide-react';
+import { ShoppingCart, Search, MapPin } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 export default function MenuPage() {
@@ -189,20 +189,26 @@ export default function MenuPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
-      {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center gap-3">
+      {/* Header modern: identitas resto + meja (kiri), keranjang (kanan) */}
+      <header className="bg-white sticky top-0 z-10 shadow-sm">
+        <div className="max-w-4xl mx-auto px-4 pt-4 flex justify-between items-start gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            {seller.logo_url && (
-              <img src={seller.logo_url} alt={seller.nama_restoran} className="w-10 h-10 rounded-lg object-cover shrink-0" />
+            {seller.logo_url ? (
+              <img src={seller.logo_url} alt={seller.nama_restoran} className="w-11 h-11 rounded-xl object-cover shrink-0" />
+            ) : (
+              <div className="w-11 h-11 rounded-xl bg-orange-100 flex items-center justify-center shrink-0">
+                <MapPin size={20} className="text-orange-500" />
+              </div>
             )}
             <div className="min-w-0">
-              <h1 className="text-xl font-bold text-gray-900 truncate">{seller.nama_restoran}</h1>
-              <div className="flex items-center gap-2 text-sm text-gray-500">
-                <span>Meja: {tableNumber}</span>
+              <p className="text-[11px] text-gray-400 leading-none mb-1">Sedang memesan di</p>
+              <h1 className="text-base font-bold text-gray-900 truncate leading-tight">{seller.nama_restoran}</h1>
+              <div className="flex items-center gap-1.5 text-xs text-gray-500 mt-0.5">
+                <MapPin size={11} />
+                <span>Meja {tableNumber}</span>
                 <button 
                   onClick={() => setTableNumber(null)}
-                  className="text-xs text-orange-500 hover:text-orange-700 underline shrink-0"
+                  className="text-orange-500 hover:text-orange-700 underline shrink-0"
                 >
                   Ganti
                 </button>
@@ -211,12 +217,12 @@ export default function MenuPage() {
           </div>
           <button
             onClick={() => navigate(`/r/${slug}/cart`)}
-            className="relative p-2 text-gray-700 hover:text-orange-500 transition-colors shrink-0"
+            className="relative w-10 h-10 rounded-full bg-gray-50 hover:bg-gray-100 flex items-center justify-center text-gray-700 transition-colors shrink-0"
             aria-label="Lihat keranjang"
           >
-            <ShoppingCart size={26} />
+            <ShoppingCart size={20} />
             {totalItems > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 bg-orange-500 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center border-2 border-white">
                 {totalItems}
               </span>
             )}
@@ -226,23 +232,25 @@ export default function MenuPage() {
         {/* Search Bar */}
         <div className="max-w-4xl mx-auto px-4 pt-3">
           <div className="relative">
-            <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+            <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Cari menu..."
-              className="w-full pl-10 pr-4 py-2.5 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+              placeholder="Cari menu favoritmu..."
+              className="w-full pl-11 pr-4 py-3 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:bg-white transition-colors"
             />
           </div>
         </div>
 
-        {/* Categories Tab */}
+        {/* Kategori - pill, scrollable horizontal */}
         <div className="max-w-4xl mx-auto px-4 py-3 flex overflow-x-auto hide-scrollbar gap-2">
           <button
             onClick={() => setActiveCategory('all')}
-            className={`px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-colors ${
-              activeCategory === 'all' ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            className={`px-4 py-2 rounded-xl whitespace-nowrap text-sm font-medium transition-colors shrink-0 ${
+              activeCategory === 'all' 
+                ? 'bg-orange-500 text-white shadow-sm shadow-orange-200' 
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
             Semua Menu
@@ -251,8 +259,10 @@ export default function MenuPage() {
             <button
               key={cat.id}
               onClick={() => setActiveCategory(cat.id)}
-              className={`px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-colors ${
-                activeCategory === cat.id ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              className={`px-4 py-2 rounded-xl whitespace-nowrap text-sm font-medium transition-colors shrink-0 ${
+                activeCategory === cat.id 
+                  ? 'bg-orange-500 text-white shadow-sm shadow-orange-200' 
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
               {cat.nama}
@@ -261,12 +271,12 @@ export default function MenuPage() {
         </div>
       </header>
 
-      {/* Menu Grid */}
+      {/* Menu Grid - 2 kolom di HP */}
       <main className="max-w-4xl mx-auto px-4 py-6">
         {loading ? (
           <div className="text-center py-10 text-gray-500">Memuat menu...</div>
         ) : filteredMenu.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5">
             {filteredMenu.map(item => (
               <MenuCard key={item.id} item={item} />
             ))}
@@ -278,13 +288,13 @@ export default function MenuPage() {
         )}
       </main>
 
-      {/* Floating Cart Icon */}
+      {/* Floating Cart Bar */}
       {totalItems > 0 && (
         <div className="fixed bottom-6 left-0 right-0 px-4 z-20 pointer-events-none">
           <div className="max-w-md mx-auto pointer-events-auto">
             <button 
               onClick={() => navigate(`/r/${slug}/cart`)}
-              className="w-full bg-gray-900 text-white p-4 rounded-xl shadow-xl flex items-center justify-between hover:bg-gray-800 transition-colors"
+              className="w-full bg-gray-900 text-white p-4 rounded-2xl shadow-xl flex items-center justify-between hover:bg-gray-800 transition-colors"
             >
               <div className="flex items-center gap-3">
                 <div className="relative">
