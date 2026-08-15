@@ -34,7 +34,7 @@ export default function ManageCashier() {
   };
 
   const inviteLink = userProfile?.seller_id
-    ? `https://projek-qrs-umber.vercel.app/cashier/register?seller_id=${userProfile.seller_id}`
+    ? `${window.location.origin}/cashier/register?seller_id=${userProfile.seller_id}`
     : '';
 
   const handleCopyLink = async () => {

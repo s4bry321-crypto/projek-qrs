@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useNavigate, Link } from 'react-router-dom';
+import { Store, User, Mail, Lock } from 'lucide-react';
+import AuthLayout from '../../components/auth/AuthLayout';
+import PillInput from '../../components/auth/PillInput';
 
 export default function AdminRegister() {
   const [formData, setFormData] = useState({
@@ -99,68 +102,67 @@ export default function AdminRegister() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
-        <h1 className="text-2xl font-bold text-center text-gray-900 mb-2">Daftar Restoran Baru</h1>
-        <p className="text-gray-500 text-center mb-6">Mulai jualan dengan sistem QR pemesanan.</p>
-        
-        {error && <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm mb-4">{error}</div>}
-        
-        <form onSubmit={handleRegister} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nama Restoran</label>
-            <input 
-              type="text" 
-              required
-              value={formData.nama_restoran}
-              onChange={(e) => setFormData({...formData, nama_restoran: e.target.value})}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-gray-900"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nama Pemilik</label>
-            <input 
-              type="text" 
-              required
-              value={formData.nama_pemilik}
-              onChange={(e) => setFormData({...formData, nama_pemilik: e.target.value})}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-gray-900"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input 
-              type="email" 
-              required
-              value={formData.email}
-              onChange={(e) => setFormData({...formData, email: e.target.value})}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-gray-900"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <input 
-              type="password" 
-              required
-              minLength={6}
-              value={formData.password}
-              onChange={(e) => setFormData({...formData, password: e.target.value})}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-gray-900"
-            />
-          </div>
-          <button 
-            type="submit" 
-            disabled={isLoading}
-            className="w-full bg-gray-900 text-white font-bold py-3 rounded-lg hover:bg-black transition disabled:opacity-70"
-          >
-            {isLoading ? 'Mendaftar...' : 'Daftar Sekarang'}
-          </button>
-        </form>
-        
-        <p className="mt-6 text-center text-sm text-gray-600">
-          Sudah punya akun? <Link to="/admin/login" className="text-gray-900 font-bold hover:underline">Masuk</Link>
-        </p>
-      </div>
-    </div>
+    <AuthLayout title="Daftar Restoran Baru" subtitle="Mulai jualan dengan sistem QR pemesanan.">
+      {error && (
+        <div className="bg-red-500/20 border border-red-400/40 text-red-100 p-3 rounded-2xl text-sm mb-4">
+          {error}
+        </div>
+      )}
+
+      <form onSubmit={handleRegister} className="space-y-4">
+        <PillInput
+          icon={<Store size={18} />}
+          value={formData.nama_restoran}
+          onChange={(e) => setFormData({ ...formData, nama_restoran: e.target.value })}
+          placeholder="Nama Restoran"
+          required
+          disabled={isLoading}
+        />
+        <PillInput
+          icon={<User size={18} />}
+          value={formData.nama_pemilik}
+          onChange={(e) => setFormData({ ...formData, nama_pemilik: e.target.value })}
+          placeholder="Nama Pemilik"
+          required
+          disabled={isLoading}
+        />
+        <PillInput
+          icon={<Mail size={18} />}
+          type="email"
+          value={formData.email}
+          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          placeholder="Email"
+          required
+          disabled={isLoading}
+          autoComplete="email"
+        />
+        <PillInput
+          icon={<Lock size={18} />}
+          isPassword
+          value={formData.password}
+          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+          placeholder="Password"
+          required
+          disabled={isLoading}
+          minLength={6}
+          autoComplete="new-password"
+        />
+        <button 
+          type="submit" 
+          disabled={isLoading}
+          className="w-full bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold py-3 rounded-full hover:from-orange-600 hover:to-amber-600 transition disabled:opacity-70 flex justify-center items-center shadow-lg"
+        >
+          {isLoading ? (
+            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+          ) : (
+            'DAFTAR SEKARANG'
+          )}
+        </button>
+      </form>
+      
+      <p className="mt-6 text-center text-sm text-white/80">
+        Sudah punya akun? <Link to="/admin/login" className="font-bold text-white underline hover:text-orange-200">Masuk</Link>
+      </p>
+    </AuthLayout>
   );
 }

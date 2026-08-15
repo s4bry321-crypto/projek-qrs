@@ -10,7 +10,7 @@ export default function AdminQR() {
   const [copied, setCopied] = useState(false);
 
   const orderUrl = sellerData?.slug
-    ? `https://projek-qrs-umber.vercel.app/r/${sellerData.slug}`
+    ? `${window.location.origin}/r/${sellerData.slug}`
     : '';
 
   useEffect(() => {

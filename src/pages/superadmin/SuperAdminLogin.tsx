@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useNavigate } from 'react-router-dom';
+import { Mail, Lock, ShieldCheck } from 'lucide-react';
+import AuthLayout from '../../components/auth/AuthLayout';
+import PillInput from '../../components/auth/PillInput';
 
 export default function SuperAdminLogin() {
   const [email, setEmail] = useState('');
@@ -66,54 +69,50 @@ export default function SuperAdminLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
-      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-200">
-        <div className="flex justify-center mb-6">
-          <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-xl">
-            SA
-          </div>
+    <AuthLayout
+      title="Super Admin"
+      subtitle="Sistem Manajemen Platform"
+      icon={<ShieldCheck size={30} className="text-white" />}
+    >
+      {error && (
+        <div className="bg-red-500/20 border border-red-400/40 text-red-100 p-3 rounded-2xl text-sm mb-4">
+          {error}
         </div>
-        <h1 className="text-2xl font-bold text-center text-slate-900 mb-2">Super Admin</h1>
-        <p className="text-slate-500 text-center mb-6">Sistem Manajemen Platform</p>
-        
-        {error && <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm mb-4 border border-red-100">{error}</div>}
+      )}
 
-        <form onSubmit={handleLogin} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Email Administrator</label>
-            <input 
-              type="email" 
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              disabled={isLoading}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
-            <input 
-              type="password" 
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              disabled={isLoading}
-            />
-          </div>
-          <button 
-            type="submit" 
-            disabled={isLoading}
-            className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition shadow-sm disabled:opacity-70 flex justify-center items-center"
-          >
-            {isLoading ? (
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-            ) : (
-              'Login Akses Sistem'
-            )}
-          </button>
-        </form>
-      </div>
-    </div>
+      <form onSubmit={handleLogin} className="space-y-4">
+        <PillInput
+          icon={<Mail size={18} />}
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Email Administrator"
+          required
+          disabled={isLoading}
+          autoComplete="email"
+        />
+        <PillInput
+          icon={<Lock size={18} />}
+          isPassword
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Password"
+          required
+          disabled={isLoading}
+          autoComplete="current-password"
+        />
+        <button 
+          type="submit" 
+          disabled={isLoading}
+          className="w-full bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold py-3 rounded-full hover:from-orange-600 hover:to-amber-600 transition shadow-lg disabled:opacity-70 flex justify-center items-center"
+        >
+          {isLoading ? (
+            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+          ) : (
+            'LOGIN AKSES SISTEM'
+          )}
+        </button>
+      </form>
+    </AuthLayout>
   );
 }

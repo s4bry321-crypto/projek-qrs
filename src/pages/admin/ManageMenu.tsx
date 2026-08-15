@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import { supabase } from '../../lib/supabase';
 import { Category, MenuItem } from '../../types';
-import { Edit2, Trash2, Plus } from 'lucide-react';
+import { Edit2, Trash2, Plus, Search } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function ManageMenu() {
@@ -24,6 +24,7 @@ export default function ManageMenu() {
   const [isUploading, setIsUploading] = useState(false);
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [isDeletingCat, setIsDeletingCat] = useState<string | null>(null);
   const [isDeletingMenu, setIsDeletingMenu] = useState<string | null>(null);
 
@@ -236,14 +237,26 @@ export default function ManageMenu() {
 
         {/* Kolom Daftar Menu */}
         <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="p-4 border-b border-gray-100 flex justify-between items-center">
+          <div className="p-4 border-b border-gray-100 flex flex-col sm:flex-row gap-3 sm:justify-between sm:items-center">
             <h2 className="text-xl font-bold">Daftar Menu</h2>
-            <button 
-              onClick={handleAddMenuClick}
-              className="bg-orange-500 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 hover:bg-orange-600 transition text-sm"
-            >
-              <Plus size={18} /> Tambah Menu
-            </button>
+            <div className="flex gap-2">
+              <div className="relative flex-1 sm:w-56">
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Cari menu..."
+                  className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                />
+              </div>
+              <button 
+                onClick={handleAddMenuClick}
+                className="bg-orange-500 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 hover:bg-orange-600 transition text-sm shrink-0"
+              >
+                <Plus size={18} /> Tambah Menu
+              </button>
+            </div>
           </div>
           <table className="w-full text-left">
             <thead className="bg-gray-50 border-b border-gray-100">
@@ -255,7 +268,9 @@ export default function ManageMenu() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {menuItems.map(item => (
+              {menuItems
+                .filter(item => item.nama.toLowerCase().includes(searchQuery.toLowerCase().trim()))
+                .map(item => (
                 <tr key={item.id}>
                   <td className="px-6 py-4">
                     <div className="font-bold text-gray-900">{item.nama}</div>

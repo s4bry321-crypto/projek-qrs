@@ -5,6 +5,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Bell, Printer, LogOut, Check, ArrowRight, Camera } from 'lucide-react';
 import { format } from 'date-fns';
 import { uploadProfilAsset } from '../../lib/uploadImage';
+import { Capacitor } from '@capacitor/core';
+import { Share } from '@capacitor/share';
 
 export default function CashierDashboard() {
   const { signOut, userProfile, sellerData } = useAuth();
@@ -139,8 +141,48 @@ export default function CashierDashboard() {
     }
   };
 
-  const handlePrint = () => {
-    window.print();
+  const buildStrukText = (order: Order): string => {
+    const lines: string[] = [];
+    lines.push((sellerData?.nama_restoran || 'Restoran').toUpperCase());
+    lines.push('================================');
+    lines.push(`Meja: ${order.nomor_meja}`);
+    lines.push(`Waktu: ${order.waktu ? format(new Date(order.waktu), 'dd MMM yyyy, HH:mm') : '-'}`);
+    lines.push(`Order ID: ${order.id.slice(-6).toUpperCase()}`);
+    lines.push('--------------------------------');
+    order.items?.forEach(item => {
+      lines.push(`${item.nama}`);
+      lines.push(`  ${item.jumlah} x ${item.harga.toLocaleString('id-ID')} = ${(item.harga * item.jumlah).toLocaleString('id-ID')}`);
+    });
+    lines.push('--------------------------------');
+    lines.push(`TOTAL: Rp ${order.total_harga.toLocaleString('id-ID')}`);
+    lines.push('================================');
+    lines.push('Terima kasih atas kunjungan Anda!');
+    return lines.join('\n');
+  };
+
+  const handlePrint = async () => {
+    // window.print() tidak didukung di WebView Android (Capacitor) - cuma jalan
+    // normal di browser biasa (web/PWA). Kalau berjalan sebagai aplikasi native,
+    // pakai Share sheet Android supaya masih bisa dikirim/print lewat aplikasi lain
+    // (Google Cloud Print, WhatsApp, simpan sebagai file, dll).
+    if (Capacitor.isNativePlatform()) {
+      if (!selectedOrder) return;
+      try {
+        await Share.share({
+          title: `Struk - Meja ${selectedOrder.nomor_meja}`,
+          text: buildStrukText(selectedOrder),
+          dialogTitle: 'Bagikan / Cetak Struk',
+        });
+      } catch (err: any) {
+        // Pengguna membatalkan share sheet - bukan error, abaikan saja.
+        if (err?.message && !err.message.toLowerCase().includes('cancel')) {
+          console.error('Gagal membagikan struk:', err);
+          alert('Gagal membagikan struk: ' + err.message);
+        }
+      }
+    } else {
+      window.print();
+    }
   };
 
   return (
@@ -241,7 +283,7 @@ export default function CashierDashboard() {
                     onClick={handlePrint}
                     className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition"
                   >
-                    <Printer size={18} /> Cetak Struk
+                    <Printer size={18} /> {Capacitor.isNativePlatform() ? 'Bagikan / Cetak Struk' : 'Cetak Struk'}
                   </button>
                   {selectedOrder.status === 'baru' && (
                     <button onClick={() => updateStatus(selectedOrder.id, 'diproses')} className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition">

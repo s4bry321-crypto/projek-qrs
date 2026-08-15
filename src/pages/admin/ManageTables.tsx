@@ -90,6 +90,9 @@ export default function ManageTables() {
         if (error) {
           console.error('Error deleting table:', error);
           setErrorMsg('Gagal menghapus meja: ' + error.message);
+        } else {
+          // Update state lokal langsung - tidak menunggu realtime subscription
+          setTables(prev => prev.filter(t => t.id !== id));
         }
       } catch (err: any) {
         console.error(err);

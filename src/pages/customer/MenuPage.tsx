@@ -3,7 +3,7 @@ import { supabase } from '../../lib/supabase';
 import { Category, MenuItem, Table, Seller } from '../../types';
 import { useCart } from '../../contexts/CartContext';
 import MenuCard from '../../components/MenuCard';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, Search } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 export default function MenuPage() {
@@ -18,6 +18,7 @@ export default function MenuPage() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [tables, setTables] = useState<Table[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
   
   const [loading, setLoading] = useState(true);
   const [loadingTables, setLoadingTables] = useState(true);
@@ -140,9 +141,10 @@ export default function MenuPage() {
 
   const availableMenuItems = menuItems.filter(m => m.status === 'tersedia');
   
-  const filteredMenu = activeCategory === 'all' 
+  const filteredMenu = (activeCategory === 'all' 
     ? availableMenuItems 
-    : availableMenuItems.filter(m => m.category_id === activeCategory);
+    : availableMenuItems.filter(m => m.category_id === activeCategory)
+  ).filter(m => m.nama.toLowerCase().includes(searchQuery.toLowerCase().trim()));
 
   if (!tableNumber) {
     return (
@@ -221,6 +223,20 @@ export default function MenuPage() {
           </button>
         </div>
         
+        {/* Search Bar */}
+        <div className="max-w-4xl mx-auto px-4 pt-3">
+          <div className="relative">
+            <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Cari menu..."
+              className="w-full pl-10 pr-4 py-2.5 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+            />
+          </div>
+        </div>
+
         {/* Categories Tab */}
         <div className="max-w-4xl mx-auto px-4 py-3 flex overflow-x-auto hide-scrollbar gap-2">
           <button
@@ -256,7 +272,9 @@ export default function MenuPage() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-10 text-gray-500">Belum ada menu yang tersedia.</div>
+          <div className="text-center py-10 text-gray-500">
+            {searchQuery ? `Tidak ada menu yang cocok dengan "${searchQuery}".` : 'Belum ada menu yang tersedia.'}
+          </div>
         )}
       </main>
 
