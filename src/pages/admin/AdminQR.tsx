@@ -60,7 +60,7 @@ export default function AdminQR() {
         <button
           onClick={handlePrint}
           disabled={!qrDataUrl}
-          className="mt-4 w-full flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-4 py-3 rounded-lg font-medium transition disabled:opacity-50"
+          className="mt-4 w-full flex items-center justify-center gap-2 bg-sky-500 hover:bg-sky-600 text-white px-4 py-3 rounded-lg font-medium transition disabled:opacity-50"
         >
           <Printer size={18} /> Cetak QR Code
         </button>

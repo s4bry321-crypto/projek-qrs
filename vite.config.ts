@@ -6,6 +6,11 @@ import {defineConfig} from 'vite';
 export default defineConfig(() => {
   return {
     plugins: [react(), tailwindcss()],
+    define: {
+      // Dihitung SEKALI saat "npm run build"/"vite build" dijalankan (di Node.js,
+      // bukan di browser), jadi ini beneran menangkap waktu deploy yang sebenarnya.
+      __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),

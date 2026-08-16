@@ -17,3 +17,9 @@ if ('serviceWorker' in navigator) {
     });
   });
 }
+
+// Penanda build - buka DevTools Console dan cek baris ini untuk pastikan
+// deployment yang sedang dibuka benar-benar versi terbaru. Nilainya di-set
+// SEKALI saat "npm run build" dijalankan (lihat vite.config.ts), bukan
+// saat halaman dibuka - jadi ini beneran nunjukin waktu deploy, bukan waktu sekarang.
+console.log('[Build] Sistem Pesan QR - versi build:', __BUILD_TIME__);

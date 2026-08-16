@@ -192,11 +192,11 @@ export default function ManageTables() {
                 placeholder="Contoh: 01, VIP-1" 
                 value={nomorMeja} 
                 onChange={(e) => setNomorMeja(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-400 focus:outline-none"
+                className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-400 focus:outline-none"
                 required
               />
             </div>
-            <button type="submit" disabled={isAdding} className="w-full bg-amber-500 text-white px-4 py-2.5 rounded-xl hover:bg-amber-600 transition flex items-center justify-center gap-2 disabled:opacity-50 font-medium">
+            <button type="submit" disabled={isAdding} className="w-full bg-sky-500 text-white px-4 py-2.5 rounded-xl hover:bg-sky-600 transition flex items-center justify-center gap-2 disabled:opacity-50 font-medium">
               {isAdding ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : <Plus size={18} />}{isAdding ? ' Menambah...' : ' Tambah'}
             </button>
           </form>
@@ -208,7 +208,7 @@ export default function ManageTables() {
             {tables.length === 0 && (
               <button 
                 onClick={handleGenerateTables}
-                className="bg-amber-50 text-amber-600 px-3 py-1.5 rounded-xl text-sm font-medium hover:bg-amber-100 transition"
+                className="bg-sky-50 text-sky-600 px-3 py-1.5 rounded-xl text-sm font-medium hover:bg-sky-100 transition"
               >
                 Generate 10 Meja
               </button>

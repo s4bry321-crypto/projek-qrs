@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { ComposedChart, Bar, Line, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface DataPoint {
   date: string;
@@ -11,15 +11,14 @@ interface SalesChartProps {
   title?: string;
   valueLabel?: string;
   currency?: boolean;
-  // Kalau true: bar warna-warni pastel dengan bar tertinggi disorot oranye
+  // Kalau true: bar biru/hijau berselang-seling + garis tren hijau di atasnya
   // (dipakai di Dashboard Admin). Kalau false (default): tetap solid oranye
   // seperti sebelumnya - dipakai di Super Admin, tidak berubah.
   colorful?: boolean;
 }
 
 const BULAN = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-const PASTEL_COLORS = ['#f9a8d4', '#93c5fd', '#86efac', '#fde68a', '#c4b5fd', '#a5f3fc', '#fdba74'];
-const HIGHLIGHT_COLOR = '#f97316';
+const BAR_COLORS = ['#38bdf8', '#4ade80'];
 
 export default function SalesChart({ data, title = 'Grafik', valueLabel = 'Nilai', currency = true, colorful = false }: SalesChartProps) {
   const [mode, setMode] = useState<'bulanan' | 'tahunan'>('bulanan');
@@ -58,17 +57,9 @@ export default function SalesChart({ data, title = 'Grafik', valueLabel = 'Nilai
   }, [data, mode, selectedMonth, selectedYear]);
 
   const total = chartData.reduce((acc, d) => acc + d.value, 0);
-  const maxIndex = useMemo(() => {
-    if (chartData.length === 0) return -1;
-    let idx = 0;
-    for (let i = 1; i < chartData.length; i++) {
-      if (chartData[i].value > chartData[idx].value) idx = i;
-    }
-    return chartData[idx].value > 0 ? idx : -1;
-  }, [chartData]);
 
   const cardBorder = colorful ? 'border-slate-100' : 'border-gray-100';
-  const activeToggleBg = colorful ? 'bg-amber-500' : 'bg-orange-500';
+  const activeToggleBg = colorful ? 'bg-sky-500' : 'bg-orange-500';
 
   return (
     <div className={`bg-white rounded-2xl shadow-sm border ${cardBorder} p-4 sm:p-6`}>
@@ -116,17 +107,20 @@ export default function SalesChart({ data, title = 'Grafik', valueLabel = 'Nilai
 
       <div className="h-64 sm:h-72">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={chartData}>
+          <ComposedChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
             <XAxis dataKey="label" tick={{ fontSize: 11 }} />
             <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => currency ? `${(v / 1000).toFixed(0)}rb` : String(v)} width={45} />
             <Tooltip formatter={(v: number) => currency ? [`Rp ${v.toLocaleString('id-ID')}`, valueLabel] : [v, valueLabel]} />
             <Bar dataKey="value" radius={[4, 4, 0, 0]} fill="#f97316">
               {colorful && chartData.map((_, index) => (
-                <Cell key={`cell-${index}`} fill={index === maxIndex ? HIGHLIGHT_COLOR : PASTEL_COLORS[index % PASTEL_COLORS.length]} />
+                <Cell key={`cell-${index}`} fill={BAR_COLORS[index % BAR_COLORS.length]} />
               ))}
             </Bar>
-          </BarChart>
+            {colorful && (
+              <Line type="monotone" dataKey="value" stroke="#22c55e" strokeWidth={2.5} dot={false} />
+            )}
+          </ComposedChart>
         </ResponsiveContainer>
       </div>
     </div>

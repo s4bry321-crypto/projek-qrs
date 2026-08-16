@@ -212,12 +212,12 @@ export default function ManageMenu() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Cari menu..."
-              className="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-100 rounded-xl text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+              className="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-100 rounded-xl text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
             />
           </div>
           <button 
             onClick={handleAddMenuClick}
-            className="bg-amber-500 text-white px-4 py-2.5 rounded-xl font-medium flex items-center gap-2 hover:bg-amber-600 transition text-sm shrink-0 shadow-sm"
+            className="bg-sky-500 text-white px-4 py-2.5 rounded-xl font-medium flex items-center gap-2 hover:bg-sky-600 transition text-sm shrink-0 shadow-sm"
           >
             <Plus size={18} /> Tambah Menu
           </button>
@@ -235,7 +235,7 @@ export default function ManageMenu() {
         <button
           onClick={() => setActiveCategory('all')}
           className={`px-4 py-2 rounded-xl whitespace-nowrap text-sm font-medium transition-colors shrink-0 ${
-            activeCategory === 'all' ? 'bg-amber-500 text-white shadow-sm' : 'bg-white border border-slate-100 text-slate-600 hover:bg-slate-50'
+            activeCategory === 'all' ? 'bg-sky-500 text-white shadow-sm' : 'bg-white border border-slate-100 text-slate-600 hover:bg-slate-50'
           }`}
         >
           Semua
@@ -245,7 +245,9 @@ export default function ManageMenu() {
             key={cat.id}
             onClick={() => setActiveCategory(cat.id)}
             className={`px-4 py-2 rounded-xl whitespace-nowrap text-sm font-medium transition-colors shrink-0 ${
-              activeCategory === cat.id ? 'bg-amber-500 text-white shadow-sm' : 'bg-white border border-slate-100 text-slate-600 hover:bg-slate-50'
+              activeCategory === cat.id
+                ? 'bg-sky-500 text-white shadow-sm'
+                : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
             }`}
           >
             {cat.nama}
@@ -301,7 +303,7 @@ export default function ManageMenu() {
                   <span className="font-bold text-slate-900 text-sm">Rp {item.harga.toLocaleString('id-ID')}</span>
                   <button
                     onClick={() => handleEditMenu(item)}
-                    className="w-8 h-8 rounded-full bg-amber-500 hover:bg-amber-600 active:scale-95 text-white flex items-center justify-center transition-all shrink-0"
+                    className="w-8 h-8 rounded-full bg-sky-500 hover:bg-sky-600 active:scale-95 text-white flex items-center justify-center transition-all shrink-0"
                     title="Edit menu"
                   >
                     <Edit2 size={14} />
@@ -329,7 +331,7 @@ export default function ManageMenu() {
                 placeholder="Nama kategori baru" 
                 value={catName} 
                 onChange={(e) => setCatName(e.target.value)}
-                className="flex-1 px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-400 focus:outline-none"
+                className="flex-1 px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-400 focus:outline-none"
                 required
               />
               <button type="submit" className="bg-slate-900 text-white px-4 py-2 rounded-xl hover:bg-slate-800 transition">Tambah</button>
@@ -400,7 +402,7 @@ export default function ManageMenu() {
                   type="file" 
                   accept="image/*"
                   onChange={handleImageChange} 
-                  className="w-full px-3 py-2 border border-slate-200 rounded-xl file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100" 
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100" 
                 />
                 {imagePreview && (
                   <div className="mt-3">
@@ -411,7 +413,7 @@ export default function ManageMenu() {
               </div>
               <div className="flex gap-3 pt-4">
                 <button type="button" onClick={() => setShowMenuForm(false)} disabled={isUploading} className="flex-1 px-4 py-2 bg-slate-100 text-slate-700 rounded-xl font-medium hover:bg-slate-200 transition disabled:opacity-50">Batal</button>
-                <button type="submit" disabled={isUploading} className="flex-1 px-4 py-2 bg-amber-500 text-white rounded-xl font-medium hover:bg-amber-600 transition disabled:opacity-50">
+                <button type="submit" disabled={isUploading} className="flex-1 px-4 py-2 bg-sky-500 text-white rounded-xl font-medium hover:bg-sky-600 transition disabled:opacity-50">
                   {isUploading ? 'Menyimpan...' : 'Simpan'}
                 </button>
               </div>
