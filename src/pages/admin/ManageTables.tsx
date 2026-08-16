@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import { supabase } from '../../lib/supabase';
 import { Table } from '../../types';
-import { Trash2, Plus, AlertCircle, Pencil } from 'lucide-react';
+import { Trash2, Plus, AlertCircle, Pencil, Table2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function ManageTables() {
@@ -91,7 +91,6 @@ export default function ManageTables() {
           console.error('Error deleting table:', error);
           setErrorMsg('Gagal menghapus meja: ' + error.message);
         } else {
-          // Update state lokal langsung - tidak menunggu realtime subscription
           setTables(prev => prev.filter(t => t.id !== id));
         }
       } catch (err: any) {
@@ -171,45 +170,45 @@ export default function ManageTables() {
   return (
     <AdminLayout>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Kelola Meja</h1>
-        <p className="text-gray-500 mt-2">Atur daftar meja yang tersedia untuk pelanggan.</p>
+        <h1 className="text-3xl font-bold text-slate-900">Kelola Meja</h1>
+        <p className="text-slate-500 mt-2">Atur daftar meja yang tersedia untuk pelanggan.</p>
       </div>
       
       {errorMsg && (
-        <div className="mb-4 p-4 bg-red-50 text-red-700 rounded-lg flex items-center gap-2 border border-red-200">
+        <div className="mb-4 p-4 bg-red-50 text-red-700 rounded-xl flex items-center gap-2 border border-red-100">
           <AlertCircle size={20} />
           <span>{errorMsg}</span>
         </div>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:col-span-1 h-fit">
-          <h2 className="text-xl font-bold mb-4">Tambah Meja</h2>
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:col-span-1 h-fit">
+          <h2 className="text-xl font-bold mb-4 text-slate-900">Tambah Meja</h2>
           <form onSubmit={handleAddTable} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nomor/Nama Meja</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Nomor/Nama Meja</label>
               <input 
                 type="text" 
                 placeholder="Contoh: 01, VIP-1" 
                 value={nomorMeja} 
                 onChange={(e) => setNomorMeja(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-400 focus:outline-none"
                 required
               />
             </div>
-            <button type="submit" disabled={isAdding} className="w-full bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-black transition flex items-center justify-center gap-2 disabled:opacity-50">
+            <button type="submit" disabled={isAdding} className="w-full bg-amber-500 text-white px-4 py-2.5 rounded-xl hover:bg-amber-600 transition flex items-center justify-center gap-2 disabled:opacity-50 font-medium">
               {isAdding ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : <Plus size={18} />}{isAdding ? ' Menambah...' : ' Tambah'}
             </button>
           </form>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:col-span-2">
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:col-span-2">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold">Daftar Meja</h2>
+            <h2 className="text-xl font-bold text-slate-900">Daftar Meja</h2>
             {tables.length === 0 && (
               <button 
                 onClick={handleGenerateTables}
-                className="bg-orange-100 text-orange-600 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-orange-200 transition"
+                className="bg-amber-50 text-amber-600 px-3 py-1.5 rounded-xl text-sm font-medium hover:bg-amber-100 transition"
               >
                 Generate 10 Meja
               </button>
@@ -217,9 +216,9 @@ export default function ManageTables() {
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             {tables.map(table => (
-              <div key={table.id} className="border border-gray-200 rounded-xl p-3 flex flex-col gap-2">
+              <div key={table.id} className="bg-white border border-slate-100 shadow-sm rounded-2xl p-4 flex flex-col items-center gap-2 relative">
                 {editingTableId === table.id ? (
-                  <div className="flex flex-col gap-2">
+                  <div className="w-full flex flex-col gap-2 py-2">
                     <input
                       type="text"
                       value={editValue}
@@ -237,7 +236,7 @@ export default function ManageTables() {
                       </button>
                       <button
                         onClick={cancelEdit}
-                        className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-medium py-1.5 rounded-lg transition-colors"
+                        className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-medium py-1.5 rounded-lg transition-colors"
                       >
                         Batal
                       </button>
@@ -245,37 +244,38 @@ export default function ManageTables() {
                   </div>
                 ) : (
                   <>
-                    <div className="flex items-center justify-end gap-1">
+                    <div className="absolute top-2 right-2 flex items-center gap-0.5">
                       <button
                         onClick={() => startEdit(table)}
-                        className="text-gray-400 hover:text-blue-500 p-1 transition-colors"
+                        className="text-slate-300 hover:text-blue-500 p-1 transition-colors"
                         title="Edit nama meja"
                       >
-                        <Pencil size={14} />
+                        <Pencil size={12} />
                       </button>
                       <button 
                         onClick={() => handleDeleteTable(table.id)}
                         disabled={isDeletingTable === table.id}
-                        className="text-gray-400 hover:text-red-500 p-1 transition-colors disabled:opacity-50"
+                        className="text-slate-300 hover:text-red-500 p-1 transition-colors disabled:opacity-50"
                         title="Hapus meja"
                       >
-                        {isDeletingTable === table.id ? <div className="w-3.5 h-3.5 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div> : <Trash2 size={14} />}
+                        {isDeletingTable === table.id ? <div className="w-3 h-3 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div> : <Trash2 size={12} />}
                       </button>
                     </div>
-                    <div className="flex flex-col items-center gap-2 pb-1">
-                      <div className="text-2xl font-bold text-gray-900">{table.nomor_meja}</div>
-                      <button 
-                        onClick={() => handleToggleStatus(table)}
-                        disabled={isToggling === table.id}
-                        className={`w-full text-xs font-medium py-1.5 rounded-lg transition-colors disabled:opacity-50 ${
-                          table.status === 'kosong'
-                            ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                            : 'bg-red-100 text-red-700 hover:bg-red-200'
-                        }`}
-                      >
-                        {isToggling === table.id ? 'Mengubah...' : table.status === 'kosong' ? 'Kosong' : 'Terisi'}
-                      </button>
+                    <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 mt-1">
+                      <Table2 size={24} />
                     </div>
+                    <div className="text-base font-bold text-slate-900">{table.nomor_meja}</div>
+                    <button 
+                      onClick={() => handleToggleStatus(table)}
+                      disabled={isToggling === table.id}
+                      className={`px-3 py-1 rounded-full text-xs font-medium transition-colors disabled:opacity-50 ${
+                        table.status === 'kosong'
+                          ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+                          : 'bg-rose-100 text-rose-700 hover:bg-rose-200'
+                      }`}
+                    >
+                      {isToggling === table.id ? 'Mengubah...' : table.status === 'kosong' ? 'Kosong' : 'Terisi'}
+                    </button>
                   </>
                 )}
               </div>

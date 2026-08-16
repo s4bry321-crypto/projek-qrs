@@ -72,7 +72,7 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
           <div className="p-4 bg-green-100 text-green-600 rounded-xl">
             <TrendingUp size={28} />
           </div>
@@ -82,7 +82,7 @@ export default function AdminDashboard() {
           </div>
         </div>
         
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
           <div className="p-4 bg-blue-100 text-blue-600 rounded-xl">
             <CheckCircle size={28} />
           </div>
@@ -92,7 +92,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
           <div className="p-4 bg-orange-100 text-orange-600 rounded-xl">
             <ShoppingBag size={28} />
           </div>
@@ -108,11 +108,12 @@ export default function AdminDashboard() {
           data={orders.filter(o => o.status === 'dibayar').map(o => ({ date: o.waktu, value: o.total_harga }))}
           title="Grafik Pendapatan"
           valueLabel="Pendapatan"
+          colorful
         />
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="p-6 border-b border-gray-100">
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        <div className="p-6 border-b border-slate-100">
           <h2 className="text-xl font-bold text-gray-900">Menu Terlaris</h2>
         </div>
         <div className="p-0">
@@ -142,7 +143,7 @@ export default function AdminDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
         {/* Ringkasan Akun */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
           <h2 className="text-xl font-bold text-gray-900 mb-4">Ringkasan Akun</h2>
           <div className="space-y-4">
             <div className="flex items-center gap-3">
@@ -182,8 +183,8 @@ export default function AdminDashboard() {
         </div>
 
         {/* Riwayat Transaksi Terakhir */}
-        <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="p-6 border-b border-gray-100">
+        <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+          <div className="p-6 border-b border-slate-100">
             <h2 className="text-xl font-bold text-gray-900">Riwayat Transaksi Terakhir</h2>
           </div>
           <div className="overflow-x-auto">

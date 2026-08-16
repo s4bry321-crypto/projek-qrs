@@ -23,10 +23,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-50">
       {/* Top bar - cuma tampil di layar sempit */}
       <div 
-        className="md:hidden fixed top-0 inset-x-0 bg-gray-900 text-white flex items-center justify-between px-4 z-30 print:hidden"
+        className="md:hidden fixed top-0 inset-x-0 bg-slate-900 text-white flex items-center justify-between px-4 z-30 print:hidden"
         style={{ paddingTop: 'env(safe-area-inset-top)', height: 'calc(env(safe-area-inset-top) + 3.5rem)' }}
       >
         <button onClick={() => setIsSidebarOpen(true)} aria-label="Buka menu">
@@ -46,11 +46,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Sidebar */}
       <aside
-        className={`w-64 bg-gray-900 text-white flex flex-col fixed inset-y-0 left-0 z-50 transform transition-transform duration-200 md:translate-x-0 print:hidden ${
+        className={`w-64 bg-slate-900 text-white flex flex-col fixed inset-y-0 left-0 z-50 transform transition-transform duration-200 md:translate-x-0 print:hidden ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="px-6 pb-6 pt-[calc(1.5rem+env(safe-area-inset-top))] md:pt-6 border-b border-gray-800 flex items-start justify-between">
+        <div className="px-6 pb-6 pt-[calc(1.5rem+env(safe-area-inset-top))] md:pt-6 border-b border-slate-800 flex items-start justify-between">
           <div className="min-w-0">
             <div className="flex items-center gap-3 mb-1">
               {sellerData?.logo_url && (
@@ -58,9 +58,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               )}
               <h1 className="text-xl font-bold text-white truncate">{sellerData?.nama_restoran || 'Admin Panel'}</h1>
             </div>
-            <p className="text-gray-400 text-sm mt-1 truncate">{userProfile?.email}</p>
+            <p className="text-slate-400 text-sm mt-1 truncate">{userProfile?.email}</p>
           </div>
-          <button onClick={() => setIsSidebarOpen(false)} className="md:hidden text-gray-400 hover:text-white shrink-0 ml-2">
+          <button onClick={() => setIsSidebarOpen(false)} className="md:hidden text-slate-400 hover:text-white shrink-0 ml-2">
             <X size={20} />
           </button>
         </div>
@@ -72,8 +72,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               end={item.path === '/admin'}
               onClick={() => setIsSidebarOpen(false)}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                  isActive ? 'bg-orange-500 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                `flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
+                  isActive ? 'bg-amber-500 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'
                 }`
               }
             >
@@ -82,10 +82,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </NavLink>
           ))}
         </nav>
-        <div className="p-4 border-t border-gray-800">
+        <div className="p-4 border-t border-slate-800">
           <button 
             onClick={handleLogout}
-            className="flex items-center gap-3 px-4 py-3 w-full rounded-lg text-gray-300 hover:bg-red-500 hover:text-white transition-colors"
+            className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-slate-300 hover:bg-red-500 hover:text-white transition-colors"
           >
             <LogOut size={20} />
             <span className="font-medium">Keluar</span>

@@ -37,22 +37,22 @@ export default function AdminQR() {
   return (
     <AdminLayout>
       <div className="mb-8 print:hidden">
-        <h2 className="text-3xl font-bold text-gray-900">Cetak QR Code</h2>
-        <p className="text-gray-500 mt-2">QR ini sama untuk semua meja — pelanggan memilih nomor mejanya sendiri setelah scan. Cetak dan tempel di tiap meja.</p>
+        <h2 className="text-3xl font-bold text-slate-900">Cetak QR Code</h2>
+        <p className="text-slate-500 mt-2">QR ini sama untuk semua meja — pelanggan memilih nomor mejanya sendiri setelah scan. Cetak dan tempel di tiap meja.</p>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 max-w-md print:hidden">
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 max-w-md print:hidden">
         {qrDataUrl ? (
-          <img src={qrDataUrl} alt="QR Code" className="w-full rounded-lg border border-gray-100" />
+          <img src={qrDataUrl} alt="QR Code" className="w-full rounded-lg border border-slate-100" />
         ) : (
-          <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
+          <div className="aspect-square bg-slate-100 rounded-xl flex items-center justify-center text-gray-400">
             Membuat QR code...
           </div>
         )}
 
-        <div className="mt-4 flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2">
-          <span className="text-sm text-gray-600 truncate flex-1">{orderUrl}</span>
-          <button onClick={handleCopy} className="text-gray-500 hover:text-gray-900 shrink-0">
+        <div className="mt-4 flex items-center gap-2 bg-slate-50 rounded-xl px-3 py-2">
+          <span className="text-sm text-slate-600 truncate flex-1">{orderUrl}</span>
+          <button onClick={handleCopy} className="text-slate-500 hover:text-slate-900 shrink-0">
             {copied ? <Check size={16} /> : <Copy size={16} />}
           </button>
         </div>
@@ -60,7 +60,7 @@ export default function AdminQR() {
         <button
           onClick={handlePrint}
           disabled={!qrDataUrl}
-          className="mt-4 w-full flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-4 py-3 rounded-lg font-medium transition disabled:opacity-50"
+          className="mt-4 w-full flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-4 py-3 rounded-lg font-medium transition disabled:opacity-50"
         >
           <Printer size={18} /> Cetak QR Code
         </button>
@@ -73,9 +73,9 @@ export default function AdminQR() {
             <img src={sellerData.logo_url} alt="Logo" className="w-16 h-16 rounded-lg object-cover mb-3" />
           )}
           <h1 className="text-2xl font-bold mb-1">{sellerData?.nama_restoran}</h1>
-          <p className="text-sm text-gray-600 mb-6">Scan untuk lihat menu & pesan</p>
+          <p className="text-sm text-slate-600 mb-6">Scan untuk lihat menu & pesan</p>
           <img src={qrDataUrl} alt="QR Code" className="w-80 h-80" />
-          <p className="text-xs text-gray-500 mt-4">{orderUrl}</p>
+          <p className="text-xs text-slate-500 mt-4">{orderUrl}</p>
         </div>
       )}
     </AdminLayout>

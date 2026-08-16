@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import { supabase } from '../../lib/supabase';
 import { Category, MenuItem } from '../../types';
-import { Edit2, Trash2, Plus, Search } from 'lucide-react';
+import { Edit2, Trash2, Plus, Search, Settings, X } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function ManageMenu() {
@@ -12,6 +12,8 @@ export default function ManageMenu() {
   
   // States for Category Form
   const [catName, setCatName] = useState('');
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<string>('all');
   
   // States for Menu Form
   const [showMenuForm, setShowMenuForm] = useState(false);
@@ -191,181 +193,225 @@ export default function ManageMenu() {
     }
   };
 
+  const filteredItems = menuItems
+    .filter(item => activeCategory === 'all' || item.category_id === activeCategory)
+    .filter(item => item.nama.toLowerCase().includes(searchQuery.toLowerCase().trim()));
+
   return (
     <AdminLayout>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Kelola Menu</h1>
-        <p className="text-gray-500 mt-2">Atur kategori dan daftar makanan.</p>
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900">Kelola Menu</h1>
+          <p className="text-slate-500 mt-1">Kategori dan grid menu premium untuk pelanggan.</p>
+        </div>
+        <div className="flex gap-2">
+          <div className="relative flex-1 sm:w-56">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Cari menu..."
+              className="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-100 rounded-xl text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+            />
+          </div>
+          <button 
+            onClick={handleAddMenuClick}
+            className="bg-amber-500 text-white px-4 py-2.5 rounded-xl font-medium flex items-center gap-2 hover:bg-amber-600 transition text-sm shrink-0 shadow-sm"
+          >
+            <Plus size={18} /> Tambah Menu
+          </button>
+        </div>
       </div>
 
       {errorMsg && (
-        <div className="mb-8 p-4 bg-red-50 text-red-700 rounded-lg flex items-center gap-2 border border-red-200">
+        <div className="mb-6 p-4 bg-red-50 text-red-700 rounded-xl flex items-center gap-2 border border-red-100">
           <span>{errorMsg}</span>
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Kolom Kategori */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-          <h2 className="text-xl font-bold mb-4">Kategori</h2>
-          <form onSubmit={handleAddCategory} className="flex gap-2 mb-4">
-            <input 
-              type="text" 
-              placeholder="Nama kategori" 
-              value={catName} 
-              onChange={(e) => setCatName(e.target.value)}
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-              required
-            />
-            <button type="submit" className="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-black transition">Tambah</button>
-          </form>
-          <ul className="divide-y divide-gray-100">
-            {categories.map(cat => (
-              <li key={cat.id} className="py-3 flex justify-between items-center">
-                <span className="font-medium text-gray-800">{cat.nama}</span>
-                <button 
-                  onClick={() => handleDeleteCategory(cat.id)} 
-                  disabled={isDeletingCat === cat.id}
-                  className="text-red-400 hover:text-red-600 disabled:opacity-50"
-                >
-                  <Trash2 size={18} />
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
+      {/* Kategori - pill horizontal scrollable */}
+      <div className="flex items-center gap-2 mb-6 overflow-x-auto hide-scrollbar pb-1">
+        <button
+          onClick={() => setActiveCategory('all')}
+          className={`px-4 py-2 rounded-xl whitespace-nowrap text-sm font-medium transition-colors shrink-0 ${
+            activeCategory === 'all' ? 'bg-amber-500 text-white shadow-sm' : 'bg-white border border-slate-100 text-slate-600 hover:bg-slate-50'
+          }`}
+        >
+          Semua
+        </button>
+        {categories.map(cat => (
+          <button
+            key={cat.id}
+            onClick={() => setActiveCategory(cat.id)}
+            className={`px-4 py-2 rounded-xl whitespace-nowrap text-sm font-medium transition-colors shrink-0 ${
+              activeCategory === cat.id ? 'bg-amber-500 text-white shadow-sm' : 'bg-white border border-slate-100 text-slate-600 hover:bg-slate-50'
+            }`}
+          >
+            {cat.nama}
+          </button>
+        ))}
+        <button
+          onClick={() => setShowCategoryModal(true)}
+          className="w-9 h-9 rounded-xl bg-white border border-slate-100 text-slate-500 hover:bg-slate-50 flex items-center justify-center shrink-0 shadow-sm"
+          title="Kelola kategori"
+        >
+          <Settings size={16} />
+        </button>
+      </div>
 
-        {/* Kolom Daftar Menu */}
-        <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="p-4 border-b border-gray-100 flex flex-col sm:flex-row gap-3 sm:justify-between sm:items-center">
-            <h2 className="text-xl font-bold">Daftar Menu</h2>
-            <div className="flex gap-2">
-              <div className="relative flex-1 sm:w-56">
-                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Cari menu..."
-                  className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
-                />
+      {/* Grid Menu Premium */}
+      {filteredItems.length === 0 ? (
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-10 text-center text-slate-400">
+          {searchQuery ? `Tidak ada menu yang cocok dengan "${searchQuery}".` : 'Belum ada menu. Klik "Tambah Menu" untuk mulai.'}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {filteredItems.map(item => (
+            <div key={item.id} className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col">
+              <div className="relative">
+                {item.foto_url ? (
+                  <img src={item.foto_url} alt={item.nama} className="w-full h-28 sm:h-32 object-cover rounded-t-2xl" />
+                ) : (
+                  <div className="w-full h-28 sm:h-32 bg-slate-100 rounded-t-2xl flex items-center justify-center text-slate-300 text-xs">
+                    No Image
+                  </div>
+                )}
+                <button
+                  onClick={() => handleDeleteMenu(item.id)}
+                  disabled={isDeletingMenu === item.id}
+                  className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/90 hover:bg-white text-red-500 flex items-center justify-center shadow-sm transition disabled:opacity-50"
+                  title="Hapus menu"
+                >
+                  {isDeletingMenu === item.id ? (
+                    <div className="w-3.5 h-3.5 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+                  ) : (
+                    <Trash2 size={13} />
+                  )}
+                </button>
               </div>
-              <button 
-                onClick={handleAddMenuClick}
-                className="bg-orange-500 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 hover:bg-orange-600 transition text-sm shrink-0"
-              >
-                <Plus size={18} /> Tambah Menu
+              <div className="p-3 flex flex-col flex-1">
+                <h3 className="font-bold text-sm text-slate-900 leading-tight line-clamp-1">{item.nama}</h3>
+                <span className={`inline-block mt-1.5 mb-2 w-fit px-2 py-0.5 rounded-full text-[10px] font-medium ${
+                  item.status === 'tersedia' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
+                }`}>
+                  {item.status === 'tersedia' ? 'Tersedia' : 'Habis'}
+                </span>
+                <div className="flex items-center justify-between mt-auto">
+                  <span className="font-bold text-slate-900 text-sm">Rp {item.harga.toLocaleString('id-ID')}</span>
+                  <button
+                    onClick={() => handleEditMenu(item)}
+                    className="w-8 h-8 rounded-full bg-amber-500 hover:bg-amber-600 active:scale-95 text-white flex items-center justify-center transition-all shrink-0"
+                    title="Edit menu"
+                  >
+                    <Edit2 size={14} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Modal Kelola Kategori */}
+      {showCategoryModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-slate-900">Kelola Kategori</h2>
+              <button onClick={() => setShowCategoryModal(false)} className="text-slate-400 hover:text-slate-700">
+                <X size={20} />
               </button>
             </div>
-          </div>
-          <table className="w-full text-left">
-            <thead className="bg-gray-50 border-b border-gray-100">
-              <tr>
-                <th className="px-6 py-4 font-medium text-gray-500">Item Menu</th>
-                <th className="px-6 py-4 font-medium text-gray-500">Harga</th>
-                <th className="px-6 py-4 font-medium text-gray-500">Status</th>
-                <th className="px-6 py-4 font-medium text-gray-500 text-right">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {menuItems
-                .filter(item => item.nama.toLowerCase().includes(searchQuery.toLowerCase().trim()))
-                .map(item => (
-                <tr key={item.id}>
-                  <td className="px-6 py-4">
-                    <div className="font-bold text-gray-900">{item.nama}</div>
-                    <div className="text-sm text-gray-500 truncate max-w-[200px]">{item.deskripsi}</div>
-                  </td>
-                  <td className="px-6 py-4 font-medium">Rp {item.harga.toLocaleString('id-ID')}</td>
-                  <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${item.status === 'tersedia' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                      {item.status.toUpperCase()}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-right flex justify-end gap-3">
-                    <button 
-                      onClick={() => handleEditMenu(item)} 
-                      disabled={isDeletingMenu === item.id}
-                      className="text-blue-500 hover:text-blue-700 disabled:opacity-50"
-                    >
-                      <Edit2 size={18} />
-                    </button>
-                    <button 
-                      onClick={() => handleDeleteMenu(item.id)} 
-                      disabled={isDeletingMenu === item.id}
-                      className="text-red-500 hover:text-red-700 disabled:opacity-50 flex items-center justify-center"
-                    >
-                      {isDeletingMenu === item.id ? (
-                        <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
-                      ) : (
-                        <Trash2 size={18} />
-                      )}
-                    </button>
-                  </td>
-                </tr>
+            <form onSubmit={handleAddCategory} className="flex gap-2 mb-4">
+              <input 
+                type="text" 
+                placeholder="Nama kategori baru" 
+                value={catName} 
+                onChange={(e) => setCatName(e.target.value)}
+                className="flex-1 px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-400 focus:outline-none"
+                required
+              />
+              <button type="submit" className="bg-slate-900 text-white px-4 py-2 rounded-xl hover:bg-slate-800 transition">Tambah</button>
+            </form>
+            <ul className="divide-y divide-slate-100 max-h-64 overflow-y-auto">
+              {categories.map(cat => (
+                <li key={cat.id} className="py-3 flex justify-between items-center">
+                  <span className="font-medium text-slate-800">{cat.nama}</span>
+                  <button 
+                    onClick={() => handleDeleteCategory(cat.id)} 
+                    disabled={isDeletingCat === cat.id}
+                    className="text-red-400 hover:text-red-600 disabled:opacity-50"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </li>
               ))}
-            </tbody>
-          </table>
+              {categories.length === 0 && (
+                <li className="py-6 text-center text-slate-400 text-sm">Belum ada kategori.</li>
+              )}
+            </ul>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Modal Form Menu */}
       {showMenuForm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
-            <h2 className="text-xl font-bold mb-4">{editingMenuId ? 'Edit Menu' : 'Tambah Menu'}</h2>
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl font-bold mb-4 text-slate-900">{editingMenuId ? 'Edit Menu' : 'Tambah Menu'}</h2>
             <form onSubmit={handleSaveMenu} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Kategori</label>
                 <select 
                   required 
                   value={menuData.category_id} 
                   onChange={(e) => setMenuData({...menuData, category_id: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl"
                 >
                   <option value="" disabled>Pilih Kategori</option>
                   {categories.map(c => <option key={c.id} value={c.id}>{c.nama}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nama Menu</label>
-                <input required type="text" value={menuData.nama} onChange={(e) => setMenuData({...menuData, nama: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+                <label className="block text-sm font-medium text-slate-700 mb-1">Nama Menu</label>
+                <input required type="text" value={menuData.nama} onChange={(e) => setMenuData({...menuData, nama: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-xl" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-                <textarea required value={menuData.deskripsi} onChange={(e) => setMenuData({...menuData, deskripsi: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg" rows={2} />
+                <label className="block text-sm font-medium text-slate-700 mb-1">Deskripsi</label>
+                <textarea required value={menuData.deskripsi} onChange={(e) => setMenuData({...menuData, deskripsi: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-xl" rows={2} />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Harga (Rp)</label>
-                  <input required type="number" min="0" value={menuData.harga} onChange={(e) => setMenuData({...menuData, harga: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Harga (Rp)</label>
+                  <input required type="number" min="0" value={menuData.harga} onChange={(e) => setMenuData({...menuData, harga: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-xl" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                  <select value={menuData.status} onChange={(e) => setMenuData({...menuData, status: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Status</label>
+                  <select value={menuData.status} onChange={(e) => setMenuData({...menuData, status: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-xl">
                     <option value="tersedia">Tersedia</option>
                     <option value="habis">Habis</option>
                   </select>
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Foto Menu (opsional)</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Foto Menu (opsional)</label>
                 <input 
                   type="file" 
                   accept="image/*"
                   onChange={handleImageChange} 
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100" 
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100" 
                 />
                 {imagePreview && (
                   <div className="mt-3">
-                    <p className="text-sm text-gray-500 mb-2">Preview:</p>
-                    <img src={imagePreview} alt="Preview" className="w-full h-40 object-cover rounded-lg border border-gray-200" />
+                    <p className="text-sm text-slate-500 mb-2">Preview:</p>
+                    <img src={imagePreview} alt="Preview" className="w-full h-40 object-cover rounded-xl border border-slate-200" />
                   </div>
                 )}
               </div>
               <div className="flex gap-3 pt-4">
-                <button type="button" onClick={() => setShowMenuForm(false)} disabled={isUploading} className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition disabled:opacity-50">Batal</button>
-                <button type="submit" disabled={isUploading} className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition disabled:opacity-50">
+                <button type="button" onClick={() => setShowMenuForm(false)} disabled={isUploading} className="flex-1 px-4 py-2 bg-slate-100 text-slate-700 rounded-xl font-medium hover:bg-slate-200 transition disabled:opacity-50">Batal</button>
+                <button type="submit" disabled={isUploading} className="flex-1 px-4 py-2 bg-amber-500 text-white rounded-xl font-medium hover:bg-amber-600 transition disabled:opacity-50">
                   {isUploading ? 'Menyimpan...' : 'Simpan'}
                 </button>
               </div>

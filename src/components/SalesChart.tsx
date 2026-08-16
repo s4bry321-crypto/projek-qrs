@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface DataPoint {
   date: string;
@@ -11,11 +11,17 @@ interface SalesChartProps {
   title?: string;
   valueLabel?: string;
   currency?: boolean;
+  // Kalau true: bar warna-warni pastel dengan bar tertinggi disorot oranye
+  // (dipakai di Dashboard Admin). Kalau false (default): tetap solid oranye
+  // seperti sebelumnya - dipakai di Super Admin, tidak berubah.
+  colorful?: boolean;
 }
 
 const BULAN = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+const PASTEL_COLORS = ['#f9a8d4', '#93c5fd', '#86efac', '#fde68a', '#c4b5fd', '#a5f3fc', '#fdba74'];
+const HIGHLIGHT_COLOR = '#f97316';
 
-export default function SalesChart({ data, title = 'Grafik', valueLabel = 'Nilai', currency = true }: SalesChartProps) {
+export default function SalesChart({ data, title = 'Grafik', valueLabel = 'Nilai', currency = true, colorful = false }: SalesChartProps) {
   const [mode, setMode] = useState<'bulanan' | 'tahunan'>('bulanan');
   const now = new Date();
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth());
@@ -52,22 +58,33 @@ export default function SalesChart({ data, title = 'Grafik', valueLabel = 'Nilai
   }, [data, mode, selectedMonth, selectedYear]);
 
   const total = chartData.reduce((acc, d) => acc + d.value, 0);
+  const maxIndex = useMemo(() => {
+    if (chartData.length === 0) return -1;
+    let idx = 0;
+    for (let i = 1; i < chartData.length; i++) {
+      if (chartData[i].value > chartData[idx].value) idx = i;
+    }
+    return chartData[idx].value > 0 ? idx : -1;
+  }, [chartData]);
+
+  const cardBorder = colorful ? 'border-slate-100' : 'border-gray-100';
+  const activeToggleBg = colorful ? 'bg-amber-500' : 'bg-orange-500';
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
+    <div className={`bg-white rounded-2xl shadow-sm border ${cardBorder} p-4 sm:p-6`}>
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <h2 className="text-xl font-bold text-gray-900">{title}</h2>
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex border border-gray-200 rounded-lg overflow-hidden text-sm">
             <button
               onClick={() => setMode('bulanan')}
-              className={`px-3 py-1.5 font-medium transition-colors ${mode === 'bulanan' ? 'bg-orange-500 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+              className={`px-3 py-1.5 font-medium transition-colors ${mode === 'bulanan' ? `${activeToggleBg} text-white` : 'bg-white text-gray-600 hover:bg-gray-50'}`}
             >
               Harian
             </button>
             <button
               onClick={() => setMode('tahunan')}
-              className={`px-3 py-1.5 font-medium transition-colors ${mode === 'tahunan' ? 'bg-orange-500 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+              className={`px-3 py-1.5 font-medium transition-colors ${mode === 'tahunan' ? `${activeToggleBg} text-white` : 'bg-white text-gray-600 hover:bg-gray-50'}`}
             >
               Bulanan
             </button>
@@ -104,7 +121,11 @@ export default function SalesChart({ data, title = 'Grafik', valueLabel = 'Nilai
             <XAxis dataKey="label" tick={{ fontSize: 11 }} />
             <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => currency ? `${(v / 1000).toFixed(0)}rb` : String(v)} width={45} />
             <Tooltip formatter={(v: number) => currency ? [`Rp ${v.toLocaleString('id-ID')}`, valueLabel] : [v, valueLabel]} />
-            <Bar dataKey="value" fill="#f97316" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="value" radius={[4, 4, 0, 0]} fill="#f97316">
+              {colorful && chartData.map((_, index) => (
+                <Cell key={`cell-${index}`} fill={index === maxIndex ? HIGHLIGHT_COLOR : PASTEL_COLORS[index % PASTEL_COLORS.length]} />
+              ))}
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>
