@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import { supabase } from '../../lib/supabase';
-import { UserX, UserCheck, Link as LinkIcon, Copy, Check } from 'lucide-react';
+import { UserX, UserCheck, Link as LinkIcon, Copy, Check, KeyRound } from 'lucide-react';
 import { UserProfile } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -11,6 +11,26 @@ export default function ManageCashier() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [copied, setCopied] = useState(false);
+  const [isResettingPw, setIsResettingPw] = useState<string | null>(null);
+
+  const handleResetPassword = async (cashier: UserProfile) => {
+    if (!cashier.email) return;
+    if (!window.confirm(`Kirim link reset password ke ${cashier.email}?`)) return;
+    setIsResettingPw(cashier.id);
+    setMessage(null);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(cashier.email, {
+        redirectTo: `${window.location.origin}/reset-password`
+      });
+      if (error) throw new Error(error.message);
+      setMessage({ type: 'success', text: `Link reset password sudah dikirim ke ${cashier.email}.` });
+    } catch (err: any) {
+      console.error('Gagal mengirim link reset password:', err);
+      setMessage({ type: 'error', text: 'Gagal mengirim link reset: ' + err.message });
+    } finally {
+      setIsResettingPw(null);
+    }
+  };
 
   useEffect(() => {
     fetchCashiers();
@@ -152,17 +172,32 @@ export default function ManageCashier() {
                     </span>
                   </td>
                   <td className="py-4 px-6 text-right">
-                    <button
-                      onClick={() => handleToggleStatus(cashier)}
-                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                        cashier.status === 'nonaktif'
-                          ? 'bg-green-50 text-green-600 hover:bg-green-100'
-                          : 'bg-red-50 text-red-600 hover:bg-red-100'
-                      }`}
-                    >
-                      {cashier.status === 'nonaktif' ? <UserCheck size={16} /> : <UserX size={16} />}
-                      {cashier.status === 'nonaktif' ? 'Aktifkan' : 'Nonaktifkan'}
-                    </button>
+                    <div className="flex justify-end gap-2">
+                      <button
+                        onClick={() => handleResetPassword(cashier)}
+                        disabled={isResettingPw === cashier.id}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors bg-blue-50 text-blue-600 hover:bg-blue-100 disabled:opacity-50"
+                        title="Kirim link reset password"
+                      >
+                        {isResettingPw === cashier.id ? (
+                          <div className="w-3.5 h-3.5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                        ) : (
+                          <KeyRound size={16} />
+                        )}
+                        Reset PW
+                      </button>
+                      <button
+                        onClick={() => handleToggleStatus(cashier)}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                          cashier.status === 'nonaktif'
+                            ? 'bg-green-50 text-green-600 hover:bg-green-100'
+                            : 'bg-red-50 text-red-600 hover:bg-red-100'
+                        }`}
+                      >
+                        {cashier.status === 'nonaktif' ? <UserCheck size={16} /> : <UserX size={16} />}
+                        {cashier.status === 'nonaktif' ? 'Aktifkan' : 'Nonaktifkan'}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

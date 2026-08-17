@@ -31,6 +31,7 @@ import ManageCashier from './pages/admin/ManageCashier';
 import AdminProfile from './pages/admin/AdminProfile';
 import AdminQR from './pages/admin/AdminQR';
 import AppHome from './pages/AppHome';
+import ResetPassword from './pages/ResetPassword';
 
 const ProtectedRoute = ({ children, allowedRoles, redirectTo }: { children: React.ReactNode, allowedRoles: string[], redirectTo: string }) => {
   const { userProfile, loading } = useAuth();
@@ -75,6 +76,7 @@ export default function App() {
             <Route path="/r/:slug/cart" element={<CartPage />} />
             <Route path="/r/:slug/order/:orderId" element={<OrderStatusPage />} />
             <Route path="/" element={<AppHome />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
 
             {/* Cashier Routes */}
             <Route path="/cashier/login" element={<CashierLogin />} />
@@ -131,6 +133,24 @@ export default function App() {
           </Routes>
         </BrowserRouter>
       </CartProvider>
+      {/* Penanda versi build - selalu kelihatan di semua halaman, kecil di pojok kanan bawah,
+          supaya bisa dicek langsung dari layar HP tanpa perlu buka DevTools/Console. */}
+      <div
+        style={{
+          position: 'fixed',
+          bottom: 4,
+          right: 6,
+          fontSize: 10,
+          color: 'rgba(0,0,0,0.35)',
+          background: 'rgba(255,255,255,0.7)',
+          padding: '1px 6px',
+          borderRadius: 6,
+          zIndex: 9999,
+          pointerEvents: 'none',
+        }}
+      >
+        v: {new Date(__BUILD_TIME__).toLocaleString('id-ID', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+      </div>
     </AuthProvider>
   );
 }

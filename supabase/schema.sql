@@ -221,6 +221,12 @@ create policy "admin update own cashiers" on profiles for update using (
   role = 'kasir' and seller_id = get_my_seller_id()
 );
 
+-- Super Admin boleh baca semua profil (dibutuhkan untuk fitur reset password Admin)
+drop policy if exists "super_admin read all profiles" on profiles;
+create policy "super_admin read all profiles" on profiles for select using (
+  get_my_role() = 'super_admin'
+);
+
 -- Admin: boleh update baris seller miliknya sendiri (nama, logo, dll)
 drop policy if exists "admin update own seller" on sellers;
 create policy "admin update own seller" on sellers for update using (

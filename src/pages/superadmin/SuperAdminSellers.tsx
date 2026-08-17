@@ -33,6 +33,7 @@ export default function SuperAdminSellers() {
   const [isDeactivating, setIsDeactivating] = useState<string | null>(null);
   const [isApproving, setIsApproving] = useState<string | null>(null);
   const [isExtendingState, setIsExtendingState] = useState<string | null>(null);
+  const [isResettingPw, setIsResettingPw] = useState<string | null>(null);
 
   useEffect(() => {
     fetchSellers();
@@ -49,6 +50,37 @@ export default function SuperAdminSellers() {
       setSellers(data as Seller[]);
     }
     setLoading(false);
+  };
+
+  const handleResetAdminPassword = async (seller: Seller) => {
+    if (!window.confirm(`Kirim link reset password ke Admin restoran "${seller.nama_restoran}"?`)) return;
+    setIsResettingPw(seller.id);
+    setMessage(null);
+    try {
+      const { data: adminProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('seller_id', seller.id)
+        .eq('role', 'admin')
+        .maybeSingle();
+
+      if (profileError) throw new Error(profileError.message);
+      if (!adminProfile?.email) {
+        throw new Error('Belum ada akun Admin untuk restoran ini.');
+      }
+
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(adminProfile.email, {
+        redirectTo: `${window.location.origin}/reset-password`
+      });
+      if (resetError) throw new Error(resetError.message);
+
+      setMessage({ type: 'success', text: `Link reset password sudah dikirim ke ${adminProfile.email}.` });
+    } catch (err: any) {
+      console.error('Gagal reset password admin:', err);
+      setMessage({ type: 'error', text: 'Gagal mengirim link reset: ' + err.message });
+    } finally {
+      setIsResettingPw(null);
+    }
   };
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -361,6 +393,14 @@ export default function SuperAdminSellers() {
                       </td>
                       <td className="p-4 text-right">
                         <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => handleResetAdminPassword(seller)}
+                            disabled={isResettingPw === seller.id}
+                            className="text-slate-600 hover:text-slate-900 font-medium px-3 py-1 rounded hover:bg-slate-100 transition disabled:opacity-50 flex items-center gap-1.5"
+                            title="Kirim link reset password ke Admin restoran ini"
+                          >
+                            {isResettingPw === seller.id ? <div className="w-3 h-3 border-2 border-slate-500 border-t-transparent rounded-full animate-spin"></div> : null} Reset PW
+                          </button>
                           <button 
                             onClick={() => { setExtendSeller(seller); setExtendDate(seller.masa_aktif_sampai || format(addMonths(new Date(), 1), 'yyyy-MM-dd')); setShowExtend(true); }}
                             className="text-blue-600 hover:text-blue-900 font-medium px-3 py-1 rounded hover:bg-blue-50 transition"

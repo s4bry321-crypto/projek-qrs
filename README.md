@@ -51,12 +51,30 @@ Klik **Deploy**. Tunggu sampai selesai, lalu buka link yang diberikan Vercel.
 
 ## BAGIAN 3 — Uji Coba Setelah Live
 
-1. Buka DevTools Console di website yang sudah live, cari baris `[Supabase] Terhubung ke project: ...` — cocokkan dengan Project URL di langkah 1.5. Kalau beda/tidak muncul, berarti Environment Variables di Vercel belum benar.
-2. Login sebagai Super Admin, coba tambah/setujui restoran percobaan.
-3. Daftar sebagai Admin baru lewat `/admin/register`, pastikan masuk ke halaman "Menunggu Persetujuan", lalu setujui dari Super Admin.
-4. Login sebagai Admin, isi menu & meja, salin link undangan Kasir, daftar sebagai Kasir di tab baru.
-5. Buka `/r/{slug-restoran}` sebagai Pelanggan, pesan sampai selesai.
-6. Cek notifikasi real-time masuk di dashboard Kasir, coba cetak struk, tandai dibayar, pastikan meja kembali kosong.
+### 3.1 Pastikan deployment yang kamu buka BENAR-BENAR yang terbaru
+
+Di pojok kanan bawah setiap halaman sekarang ada teks kecil abu-abu seperti `v: 16/08 14:32` — itu waktu build-nya. Ikuti urutan ini SETIAP KALI habis push perubahan baru:
+
+1. **Push semua file** dari zip ini ke GitHub (ganti/timpa semua file lama, jangan cuma sebagian).
+2. Buka **Vercel > project kamu > Deployments**, tunggu sampai deployment terbaru selesai (tanda centang hijau, bukan masih "Building").
+3. **Buka tab baru dalam mode Incognito/Penyamaran** (paling penting — mode biasa bisa kena cache lama), lalu buka URL website kamu.
+4. Lihat angka di pojok kanan bawah layar. Bandingkan dengan waktu barusan kamu push/deploy — harusnya dekat/sama.
+   - **Kalau angkanya BARU** (cocok dengan waktu deploy barusan) tapi tampilannya masih kelihatan lama → berarti deployment-nya benar, kemungkinan besar salah lihat halaman (misal buka `/` bukan `/r/nama-slug-restoran`) — kirim screenshot ke saya, saya bantu cek lebih lanjut.
+   - **Kalau angkanya MASIH LAMA** (nggak berubah dari sebelumnya) → berarti deployment barunya belum benar-benar kepakai. Lanjut ke langkah 5.
+5. Buka **Vercel > Deployments > (deployment terbaru) > ⋯ > Redeploy**, dan **matikan/uncheck "Use existing Build Cache"** kalau ada opsinya, supaya di-build ulang dari nol.
+6. Ulangi langkah 3-4 di tab incognito baru.
+
+### 3.2 Kalau masih lama juga (jarang terjadi, tapi kalau iya)
+- Cek di GitHub, buka file `src/App.tsx` langsung di repo-nya (bukan di HP kamu), pastikan ada baris `v: {new Date(__BUILD_TIME__)...` di dekat akhir file — kalau nggak ada, berarti file yang ke-push ke GitHub bukan versi yang saya kasih.
+- Kirim screenshot Vercel **Deployments** (daftar semua deployment beserta waktunya) supaya saya bisa bantu lihat riwayatnya.
+
+### 3.3 Checklist fitur
+1. Login sebagai Super Admin, coba tambah/setujui restoran percobaan.
+2. Daftar sebagai Admin baru lewat `/admin/register`, pastikan masuk ke halaman "Menunggu Persetujuan", lalu setujui dari Super Admin.
+3. Login sebagai Admin, isi menu & meja, salin link undangan Kasir, daftar sebagai Kasir di tab baru.
+4. Buka `/r/{slug-restoran}` sebagai Pelanggan, pesan sampai selesai.
+5. Cek notifikasi real-time masuk di dashboard Kasir, coba cetak struk, tandai dibayar, pastikan meja kembali kosong.
+6. Coba fitur reset password: dari Kelola Kasir (Admin) dan Kelola Restoran (Super Admin), klik "Reset PW", cek email penerima menerima link reset.
 
 ---
 
