@@ -281,33 +281,24 @@ drop policy if exists "public read order_items" on order_items;
 -- manapun, termasuk kalau sesi login di browser dia masih tersimpan/valid.
 drop policy if exists "staff read own orders" on orders;
 create policy "staff read own orders" on orders for select using (
-  exists (
-    select 1 from profiles
-    where profiles.id = auth.uid()
-      and profiles.role in ('admin','kasir')
-      and profiles.status = 'aktif'
-      and profiles.seller_id = orders.seller_id
-  )
+  get_my_role() in ('admin','kasir')
+  and get_my_status() = 'aktif'
+  and get_my_seller_id() = orders.seller_id
 );
 drop policy if exists "staff update own orders" on orders;
 create policy "staff update own orders" on orders for update using (
-  exists (
-    select 1 from profiles
-    where profiles.id = auth.uid()
-      and profiles.role in ('admin','kasir')
-      and profiles.status = 'aktif'
-      and profiles.seller_id = orders.seller_id
-  )
+  get_my_role() in ('admin','kasir')
+  and get_my_status() = 'aktif'
+  and get_my_seller_id() = orders.seller_id
 );
 drop policy if exists "staff read own order_items" on order_items;
 create policy "staff read own order_items" on order_items for select using (
   exists (
     select 1 from orders
-    join profiles on profiles.id = auth.uid()
     where orders.id = order_items.order_id
-      and profiles.role in ('admin','kasir')
-      and profiles.status = 'aktif'
-      and profiles.seller_id = orders.seller_id
+      and get_my_role() in ('admin','kasir')
+      and get_my_status() = 'aktif'
+      and get_my_seller_id() = orders.seller_id
   )
 );
 
@@ -319,27 +310,18 @@ create policy "staff read own order_items" on order_items for select using (
 -- halaman "Nonaktif" di tampilan React saja.
 drop policy if exists "admin write own menu_items" on menu_items;
 create policy "admin write own menu_items" on menu_items for all using (
-  exists (
-    select 1 from profiles
-    where profiles.id = auth.uid() and profiles.role = 'admin'
-      and profiles.status = 'aktif' and profiles.seller_id = menu_items.seller_id
-  ) and seller_is_active(menu_items.seller_id)
+  get_my_role() = 'admin' and get_my_status() = 'aktif' and get_my_seller_id() = menu_items.seller_id
+  and seller_is_active(menu_items.seller_id)
 );
 drop policy if exists "admin write own categories" on categories;
 create policy "admin write own categories" on categories for all using (
-  exists (
-    select 1 from profiles
-    where profiles.id = auth.uid() and profiles.role = 'admin'
-      and profiles.status = 'aktif' and profiles.seller_id = categories.seller_id
-  ) and seller_is_active(categories.seller_id)
+  get_my_role() = 'admin' and get_my_status() = 'aktif' and get_my_seller_id() = categories.seller_id
+  and seller_is_active(categories.seller_id)
 );
 drop policy if exists "admin write own tables" on tables;
 create policy "admin write own tables" on tables for all using (
-  exists (
-    select 1 from profiles
-    where profiles.id = auth.uid() and profiles.role = 'admin'
-      and profiles.status = 'aktif' and profiles.seller_id = tables.seller_id
-  ) and seller_is_active(tables.seller_id)
+  get_my_role() = 'admin' and get_my_status() = 'aktif' and get_my_seller_id() = tables.seller_id
+  and seller_is_active(tables.seller_id)
 );
 
 -- Kasir: boleh ubah STATUS meja (kosong/terisi) sebagai bagian dari layani
@@ -353,11 +335,7 @@ create policy "admin write own tables" on tables for all using (
 -- berjalan.
 drop policy if exists "staff update own tables" on tables;
 create policy "staff update own tables" on tables for update using (
-  exists (
-    select 1 from profiles
-    where profiles.id = auth.uid() and profiles.role in ('admin','kasir')
-      and profiles.status = 'aktif' and profiles.seller_id = tables.seller_id
-  )
+  get_my_role() in ('admin','kasir') and get_my_status() = 'aktif' and get_my_seller_id() = tables.seller_id
 );
 
 -- Sellers: Super Admin kelola semua; staff baca & ubah data restoran sendiri;
@@ -368,14 +346,11 @@ create policy "super_admin manage sellers" on sellers for all using (
 );
 drop policy if exists "staff read own seller" on sellers;
 create policy "staff read own seller" on sellers for select using (
-  exists (select 1 from profiles where profiles.id = auth.uid() and profiles.seller_id = sellers.id)
+  get_my_seller_id() = sellers.id
 );
 drop policy if exists "admin update own seller" on sellers;
 create policy "admin update own seller" on sellers for update using (
-  exists (
-    select 1 from profiles
-    where profiles.id = auth.uid() and profiles.role = 'admin' and profiles.seller_id = sellers.id
-  )
+  get_my_role() = 'admin' and get_my_seller_id() = sellers.id
 );
 drop policy if exists "self signup create seller" on sellers;
 create policy "self signup create seller" on sellers for insert to authenticated with check (true);
@@ -420,18 +395,12 @@ create policy "self signup create own profile" on profiles for insert with check
 drop policy if exists "admin manage own cashiers" on profiles;
 create policy "admin manage own cashiers" on profiles for select using (
   profiles.role = 'kasir'
-  and exists (
-    select 1 from profiles p2
-    where p2.id = auth.uid() and p2.role = 'admin' and p2.status = 'aktif' and p2.seller_id = profiles.seller_id
-  )
+  and get_my_role() = 'admin' and get_my_status() = 'aktif' and get_my_seller_id() = profiles.seller_id
 );
 drop policy if exists "admin update own cashiers" on profiles;
 create policy "admin update own cashiers" on profiles for update using (
   profiles.role = 'kasir'
-  and exists (
-    select 1 from profiles p2
-    where p2.id = auth.uid() and p2.role = 'admin' and p2.status = 'aktif' and p2.seller_id = profiles.seller_id
-  )
+  and get_my_role() = 'admin' and get_my_status() = 'aktif' and get_my_seller_id() = profiles.seller_id
 );
 
 drop policy if exists "super_admin read all profiles" on profiles;
@@ -472,10 +441,7 @@ create policy "super_admin manage payments" on payments for all using (
 -- "menukar" token jadi akun kasir adalah lewat claim_cashier_invite().
 drop policy if exists "admin read own cashier_invite" on cashier_invites;
 create policy "admin read own cashier_invite" on cashier_invites for select using (
-  exists (
-    select 1 from profiles
-    where profiles.id = auth.uid() and profiles.role = 'admin' and profiles.seller_id = cashier_invites.seller_id
-  )
+  get_my_role() = 'admin' and get_my_seller_id() = cashier_invites.seller_id
 );
 
 -- ============================================================

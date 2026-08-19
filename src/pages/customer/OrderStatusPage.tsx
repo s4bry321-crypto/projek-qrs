@@ -50,7 +50,7 @@ export default function OrderStatusPage() {
       case 'baru':
         return { icon: <Clock size={48} className="text-blue-500" />, text: 'Pesanan Diterima', color: 'text-blue-500', bg: 'bg-blue-50' };
       case 'diproses':
-        return { icon: <ChefHat size={48} className="text-orange-500" />, text: 'Sedang Dimasak', color: 'text-orange-500', bg: 'bg-orange-50' };
+        return { icon: <ChefHat size={48} className="text-amber-500" />, text: 'Sedang Dimasak', color: 'text-amber-500', bg: 'bg-amber-50' };
       case 'selesai':
         return { icon: <CheckCircle2 size={48} className="text-green-500" />, text: 'Siap Disajikan', color: 'text-green-500', bg: 'bg-green-50' };
       case 'dibayar':
@@ -63,7 +63,7 @@ export default function OrderStatusPage() {
   const statusInfo = getStatusDisplay();
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-8">
+    <div className="min-h-screen bg-cream-50 pb-8">
       <header className="bg-white shadow-sm px-4 py-4 flex items-center gap-3">
         <button onClick={() => navigate(`/r/${slug}`)} className="text-gray-500 hover:text-gray-900">
           <ArrowLeft size={24} />
@@ -72,13 +72,13 @@ export default function OrderStatusPage() {
       </header>
 
       <main className="max-w-xl mx-auto px-4 py-8">
-        <div className={`p-8 rounded-2xl flex flex-col items-center justify-center mb-8 ${statusInfo.bg}`}>
+        <div className={`p-8 rounded-3xl flex flex-col items-center justify-center mb-8 ${statusInfo.bg}`}>
           <div className="mb-4">{statusInfo.icon}</div>
           <h2 className={`text-2xl font-bold ${statusInfo.color}`}>{statusInfo.text}</h2>
           <p className="text-gray-600 mt-2">Meja: <span className="font-bold text-gray-900">{order.nomor_meja}</span></p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
           <h3 className="font-bold text-lg mb-4 border-b pb-2">Rincian Pesanan</h3>
           <div className="space-y-4 mb-6">
             {order.items?.map((item, idx) => (

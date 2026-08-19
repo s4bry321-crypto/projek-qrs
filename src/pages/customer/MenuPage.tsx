@@ -3,7 +3,7 @@ import { supabase } from '../../lib/supabase';
 import { Category, MenuItem, Table, Seller } from '../../types';
 import { useCart } from '../../contexts/CartContext';
 import MenuCard from '../../components/MenuCard';
-import { ShoppingCart, Search, MapPin } from 'lucide-react';
+import { ShoppingCart, Search, MapPin, UtensilsCrossed, LayoutGrid } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 export default function MenuPage() {
@@ -130,8 +130,8 @@ export default function MenuPage() {
 
   if (!seller) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white p-8 rounded-2xl shadow-lg max-w-md w-full text-center">
+      <div className="min-h-screen bg-cream-50 flex items-center justify-center p-4">
+        <div className="bg-white p-8 rounded-3xl shadow-lg max-w-md w-full text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Restoran Tidak Ditemukan</h1>
           <p className="text-gray-500">Restoran yang Anda tuju tidak ditemukan atau sedang tidak aktif.</p>
         </div>
@@ -146,10 +146,19 @@ export default function MenuPage() {
     : availableMenuItems.filter(m => m.category_id === activeCategory)
   ).filter(m => m.nama.toLowerCase().includes(searchQuery.toLowerCase().trim()));
 
+  const categoryNameById = Object.fromEntries(categories.map(c => [c.id, c.nama]));
+
   if (!tableNumber) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white p-8 rounded-2xl shadow-lg max-w-md w-full text-center">
+      <div className="min-h-screen bg-cream-50 flex items-center justify-center p-4">
+        <div className="bg-white p-8 rounded-3xl shadow-lg max-w-md w-full text-center">
+          {seller.logo_url ? (
+            <img src={seller.logo_url} alt={seller.nama_restoran} className="w-16 h-16 rounded-2xl object-cover mx-auto mb-4" />
+          ) : (
+            <div className="w-16 h-16 rounded-2xl bg-brand-50 flex items-center justify-center mx-auto mb-4">
+              <UtensilsCrossed size={26} className="text-brand-600" />
+            </div>
+          )}
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Selamat Datang di {seller.nama_restoran}!</h1>
           <p className="text-gray-500 mb-6">Silakan pilih nomor meja Anda untuk mulai memesan.</p>
           
@@ -169,7 +178,7 @@ export default function MenuPage() {
                 className={`py-6 rounded-2xl border-2 font-bold text-3xl transition-all shadow-sm active:scale-95 ${
                   t.status === 'terisi' 
                     ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed opacity-70'
-                    : 'border-orange-200 bg-white hover:border-orange-500 hover:bg-orange-50 text-orange-600 shadow-orange-50'
+                    : 'border-brand-200 bg-white hover:border-brand-600 hover:bg-brand-50 text-brand-600'
                 }`}
                 disabled={t.status === 'terisi'}
               >
@@ -188,97 +197,99 @@ export default function MenuPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
-      {/* Header modern: identitas resto + meja (kiri), keranjang (kanan) */}
+    <div className="min-h-screen bg-cream-50 pb-24">
+      {/* Header: identitas resto + meja, pencarian, kategori */}
       <header className="bg-white sticky top-0 z-10 shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 pt-4 flex justify-between items-start gap-3">
-          <div className="flex items-center gap-3 min-w-0">
+        <div className="max-w-5xl mx-auto px-4 pt-4 flex justify-between items-center gap-3">
+          <div className="flex items-center gap-2.5 min-w-0">
             {seller.logo_url ? (
-              <img src={seller.logo_url} alt={seller.nama_restoran} className="w-11 h-11 rounded-xl object-cover shrink-0" />
+              <img src={seller.logo_url} alt={seller.nama_restoran} className="w-10 h-10 rounded-xl object-cover shrink-0" />
             ) : (
-              <div className="w-11 h-11 rounded-xl bg-orange-100 flex items-center justify-center shrink-0">
-                <MapPin size={20} className="text-orange-500" />
+              <div className="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center shrink-0">
+                <UtensilsCrossed size={18} className="text-brand-600" />
               </div>
             )}
-            <div className="min-w-0">
-              <p className="text-[11px] text-gray-400 leading-none mb-1">Sedang memesan di</p>
-              <h1 className="text-base font-bold text-gray-900 truncate leading-tight">{seller.nama_restoran}</h1>
-              <div className="flex items-center gap-1.5 text-xs text-gray-500 mt-0.5">
-                <MapPin size={11} />
-                <span>Meja {tableNumber}</span>
-                <button 
-                  onClick={() => setTableNumber(null)}
-                  className="text-orange-500 hover:text-orange-700 underline shrink-0"
-                >
-                  Ganti
-                </button>
-              </div>
-            </div>
+            <h1 className="text-lg font-extrabold text-brand-700 truncate leading-tight">{seller.nama_restoran}</h1>
           </div>
           <button
             onClick={() => navigate(`/r/${slug}/cart`)}
-            className="relative w-10 h-10 rounded-full bg-gray-50 hover:bg-gray-100 flex items-center justify-center text-gray-700 transition-colors shrink-0"
+            className="relative w-11 h-11 rounded-2xl bg-cream-100 hover:bg-brand-50 flex items-center justify-center text-gray-700 transition-colors shrink-0"
             aria-label="Lihat keranjang"
           >
             <ShoppingCart size={20} />
             {totalItems > 0 && (
-              <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center border-2 border-white">
+              <span className="absolute -top-1.5 -right-1.5 bg-brand-600 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center border-2 border-white">
                 {totalItems}
               </span>
             )}
           </button>
         </div>
+
+        {/* Info meja - posisinya sama seperti baris "lokasi Anda" di desain acuan */}
+        <div className="max-w-5xl mx-auto px-4 pt-2 flex items-center gap-1.5 text-sm text-gray-500">
+          <MapPin size={14} className="text-brand-600 shrink-0" />
+          <span>Meja Anda: <span className="font-bold text-gray-900">{tableNumber}</span></span>
+          <button
+            onClick={() => setTableNumber(null)}
+            className="text-brand-600 hover:text-brand-700 underline shrink-0 ml-1"
+          >
+            Ganti
+          </button>
+        </div>
         
         {/* Search Bar */}
-        <div className="max-w-4xl mx-auto px-4 pt-3">
-          <div className="relative">
-            <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+        <div className="max-w-5xl mx-auto px-4 pt-3">
+          <div className="relative flex items-center">
+            <Search size={17} className="absolute left-4 text-gray-400 pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Cari menu favoritmu..."
-              className="w-full pl-11 pr-4 py-3 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:bg-white transition-colors"
+              className="w-full pl-11 pr-14 py-3 bg-cream-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 focus:bg-white transition-colors"
             />
+            <span className="absolute right-1.5 w-9 h-9 rounded-full bg-brand-600 flex items-center justify-center text-white shrink-0">
+              <Search size={15} />
+            </span>
           </div>
         </div>
 
-        {/* Kategori - pill, scrollable horizontal */}
-        <div className="max-w-4xl mx-auto px-4 py-3 flex overflow-x-auto hide-scrollbar gap-2">
+        {/* Kategori - pill outline, scrollable horizontal */}
+        <div className="max-w-5xl mx-auto px-4 py-3 flex overflow-x-auto hide-scrollbar gap-2">
           <button
             onClick={() => setActiveCategory('all')}
-            className={`px-4 py-2 rounded-xl whitespace-nowrap text-sm font-medium transition-colors shrink-0 ${
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-2xl whitespace-nowrap text-sm font-medium transition-colors shrink-0 border ${
               activeCategory === 'all' 
-                ? 'bg-orange-500 text-white shadow-sm shadow-orange-200' 
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                ? 'bg-white border-brand-600 text-brand-600 shadow-sm' 
+                : 'bg-cream-100 border-transparent text-gray-600 hover:bg-cream-100/70'
             }`}
           >
-            Semua Menu
+            <LayoutGrid size={14} /> Semua Menu
           </button>
           {categories.map(cat => (
             <button
               key={cat.id}
               onClick={() => setActiveCategory(cat.id)}
-              className={`px-4 py-2 rounded-xl whitespace-nowrap text-sm font-medium transition-colors shrink-0 ${
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-2xl whitespace-nowrap text-sm font-medium transition-colors shrink-0 border ${
                 activeCategory === cat.id 
-                  ? 'bg-orange-500 text-white shadow-sm shadow-orange-200' 
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? 'bg-white border-brand-600 text-brand-600 shadow-sm' 
+                  : 'bg-cream-100 border-transparent text-gray-600 hover:bg-cream-100/70'
               }`}
             >
-              {cat.nama}
+              <UtensilsCrossed size={14} /> {cat.nama}
             </button>
           ))}
         </div>
       </header>
 
-      {/* Menu Grid - 2 kolom di HP */}
-      <main className="max-w-4xl mx-auto px-4 py-6">
+      {/* Menu Grid - 2 kolom di HP, 3 kolom di layar lebih lebar */}
+      <main className="max-w-5xl mx-auto px-4 py-6">
         {loading ? (
           <div className="text-center py-10 text-gray-500">Memuat menu...</div>
         ) : filteredMenu.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-x-3 gap-y-6 sm:gap-x-5 sm:gap-y-8">
             {filteredMenu.map(item => (
-              <MenuCard key={item.id} item={item} />
+              <MenuCard key={item.id} item={item} categoryName={categoryNameById[item.category_id]} />
             ))}
           </div>
         ) : (
@@ -294,12 +305,12 @@ export default function MenuPage() {
           <div className="max-w-md mx-auto pointer-events-auto">
             <button 
               onClick={() => navigate(`/r/${slug}/cart`)}
-              className="w-full bg-gray-900 text-white p-4 rounded-2xl shadow-xl flex items-center justify-between hover:bg-gray-800 transition-colors"
+              className="w-full bg-ink-900 text-white p-4 rounded-2xl shadow-xl flex items-center justify-between hover:bg-brand-900 transition-colors"
             >
               <div className="flex items-center gap-3">
                 <div className="relative">
                   <ShoppingCart size={24} />
-                  <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
+                  <span className="absolute -top-2 -right-2 bg-brand-600 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
                     {totalItems}
                   </span>
                 </div>

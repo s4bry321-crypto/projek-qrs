@@ -43,12 +43,12 @@ export default function CartPage() {
 
   if (cart.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+      <div className="min-h-screen bg-cream-50 flex flex-col items-center justify-center p-4">
         <h2 className="text-xl font-bold text-gray-800 mb-2">Keranjang Kosong</h2>
         <p className="text-gray-500 mb-6">Anda belum menambahkan makanan ke keranjang.</p>
         <button 
           onClick={() => navigate(`/r/${slug}`)}
-          className="bg-orange-500 text-white px-6 py-2 rounded-lg font-medium hover:bg-orange-600 transition"
+          className="bg-brand-600 text-white px-6 py-2 rounded-full font-medium hover:bg-brand-700 transition"
         >
           Lihat Menu
         </button>
@@ -57,7 +57,7 @@ export default function CartPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-32">
+    <div className="min-h-screen bg-cream-50 pb-32">
       <header className="bg-white shadow-sm sticky top-0 z-10 px-4 py-4 flex items-center gap-3">
         <button onClick={() => navigate(`/r/${slug}`)} className="text-gray-500 hover:text-gray-900">
           <ArrowLeft size={24} />
@@ -68,11 +68,11 @@ export default function CartPage() {
 
       <main className="max-w-3xl mx-auto px-4 py-6 space-y-4">
         {cart.map(item => (
-          <div key={item.menu_id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col gap-3">
+          <div key={item.menu_id} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-3">
             <div className="flex justify-between items-start">
               <div>
                 <h3 className="font-semibold text-gray-900">{item.nama}</h3>
-                <p className="text-orange-600 font-medium">Rp {item.harga.toLocaleString('id-ID')}</p>
+                <p className="text-brand-600 font-medium">Rp {item.harga.toLocaleString('id-ID')}</p>
               </div>
               <button onClick={() => removeFromCart(item.menu_id)} className="text-red-400 hover:text-red-600 p-1">
                 <Trash2 size={20} />
@@ -80,7 +80,7 @@ export default function CartPage() {
             </div>
             
             {item.catatan && (
-              <p className="text-sm text-gray-500 bg-gray-50 p-2 rounded">
+              <p className="text-sm text-gray-500 bg-cream-100 p-2 rounded">
                 Catatan: {item.catatan}
               </p>
             )}
@@ -108,7 +108,7 @@ export default function CartPage() {
           <button 
             onClick={handleSubmitOrder}
             disabled={isSubmitting}
-            className="w-full bg-orange-500 text-white font-bold py-4 rounded-xl hover:bg-orange-600 transition disabled:opacity-70 flex justify-center items-center gap-2"
+            className="w-full bg-brand-600 text-white font-bold py-4 rounded-2xl hover:bg-brand-700 transition disabled:opacity-70 flex justify-center items-center gap-2"
           >
             {isSubmitting ? 'Mengirim Pesanan...' : 'Kirim Pesanan'}
           </button>

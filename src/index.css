@@ -1,1 +1,37 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
+
+/* Palet warna terinspirasi desain acuan (merah anggur hangat), dipakai di
+   seluruh halaman pelanggan (menu, keranjang, status pesanan) supaya satu
+   alur terasa konsisten. */
+@theme {
+  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+
+  --color-brand-50: #fbeaed;
+  --color-brand-100: #f6d5db;
+  --color-brand-200: #eeb1bc;
+  --color-brand-400: #b3465e;
+  --color-brand-500: #99304a;
+  --color-brand-600: #7f2035;
+  --color-brand-700: #63182a;
+  --color-brand-900: #3a0f1a;
+
+  --color-cream-50: #fbf8f6;
+  --color-cream-100: #f5efeb;
+
+  --color-ink-900: #241417;
+}
+
+body {
+  font-family: var(--font-sans);
+}
+
+/* Sembunyikan scrollbar untuk baris yang di-scroll horizontal (kategori),
+   scroll tetap jalan dengan sentuhan/drag, cuma bar-nya yang disembunyikan. */
+.hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
