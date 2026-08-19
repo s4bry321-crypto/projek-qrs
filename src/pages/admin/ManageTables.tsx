@@ -5,6 +5,16 @@ import { Table } from '../../types';
 import { Trash2, Plus, AlertCircle, Pencil, Table2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
+// error.code '23505' = pelanggaran unique constraint Postgres -- di sini
+// spesifiknya constraint tables_seller_nomor_unique dari schema.sql (cegah
+// nomor meja ganda dalam 1 restoran).
+function friendlyTableError(error: any, fallbackPrefix: string): string {
+  if (error?.code === '23505') {
+    return 'Nomor meja ini sudah dipakai. Gunakan nomor/nama lain.';
+  }
+  return fallbackPrefix + (error?.message || 'Terjadi kesalahan.');
+}
+
 export default function ManageTables() {
   const { userProfile } = useAuth();
   const [tables, setTables] = useState<Table[]>([]);
@@ -50,18 +60,28 @@ export default function ManageTables() {
 
   const handleAddTable = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!nomorMeja || !userProfile?.seller_id) return;
+    const trimmed = nomorMeja.trim();
+    if (!trimmed || !userProfile?.seller_id) return;
+
+    // Cek duplikat di sisi klien dulu untuk feedback instan -- pengecekan
+    // yang sebenarnya menentukan (anti race-condition, mis. 2 tab dibuka
+    // bersamaan) tetap constraint unik di database (lihat schema.sql).
+    if (tables.some(t => t.nomor_meja === trimmed)) {
+      setErrorMsg('Nomor meja ini sudah dipakai. Gunakan nomor/nama lain.');
+      return;
+    }
+
     setIsAdding(true);
     setErrorMsg('');
     try {
       const { data, error } = await supabase.from('tables').insert({ 
         seller_id: userProfile.seller_id,
-        nomor_meja: nomorMeja, 
+        nomor_meja: trimmed, 
         status: 'kosong' 
       }).select().single();
       if (error) {
         console.error('Error adding table:', error);
-        setErrorMsg('Gagal menambah meja: ' + error.message);
+        setErrorMsg(friendlyTableError(error, 'Gagal menambah meja: '));
       } else if (data) {
         // Update state lokal langsung - tidak menunggu realtime subscription,
         // supaya meja baru langsung muncul walau koneksi realtime lambat/gagal.
@@ -130,7 +150,9 @@ export default function ManageTables() {
       const { error } = await supabase.from('tables').insert(newTables);
       if (error) { 
          console.error('Error generating tables:', error);
-         setErrorMsg('Gagal generate meja: ' + error.message);
+         setErrorMsg(friendlyTableError(error, 'Gagal generate meja: '));
+      } else {
+        fetchTables();
       }
     }
   };
@@ -147,15 +169,22 @@ export default function ManageTables() {
   };
 
   const saveEdit = async (id: string) => {
-    if (!editValue.trim()) return;
+    const trimmed = editValue.trim();
+    if (!trimmed) return;
+    if (tables.some(t => t.id !== id && t.nomor_meja === trimmed)) {
+      setErrorMsg('Nomor meja ini sudah dipakai. Gunakan nomor/nama lain.');
+      return;
+    }
     setIsSavingEdit(true);
     setErrorMsg('');
     try {
-      const { error } = await supabase.from('tables').update({ nomor_meja: editValue.trim() }).eq('id', id);
+      const { error } = await supabase.from('tables').update({ nomor_meja: trimmed }).eq('id', id);
       if (error) {
         console.error('Error updating table:', error);
-        setErrorMsg('Gagal mengubah nama meja: ' + error.message);
+        setErrorMsg(friendlyTableError(error, 'Gagal mengubah nama meja: '));
       } else {
+        setTables(prev => prev.map(t => t.id === id ? { ...t, nomor_meja: trimmed } : t)
+          .sort((a, b) => a.nomor_meja.localeCompare(b.nomor_meja, undefined, { numeric: true, sensitivity: 'base' })));
         setEditingTableId(null);
         setEditValue('');
       }

@@ -1,23 +1,23 @@
 import React, { useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { User, Mail, Lock } from 'lucide-react';
+import { useSearchParams, Link } from 'react-router-dom';
+import { User, Mail, Lock, CheckCircle2 } from 'lucide-react';
 import AuthLayout from '../../components/auth/AuthLayout';
 import PillInput from '../../components/auth/PillInput';
 
 export default function CashierRegister() {
   const [searchParams] = useSearchParams();
-  const sellerId = searchParams.get('seller_id');
+  const token = searchParams.get('token');
   const [formData, setFormData] = useState({ nama: '', email: '', password: '' });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
+  const [registered, setRegistered] = useState(false);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    if (!sellerId) {
+    if (!token) {
       setError('Link undangan tidak valid. Minta link baru dari Admin restoran Anda.');
       return;
     }
@@ -42,25 +42,20 @@ export default function CashierRegister() {
         throw new Error('Gagal membuat akun: Data user tidak ditemukan.');
       }
 
-      console.log('Langkah 2: Menyimpan data profil kasir...');
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          id: authData.user.id,
-          email: formData.email,
-          nama: formData.nama,
-          role: 'kasir',
-          seller_id: sellerId,
-          status: 'aktif'
-        });
+      console.log('Langkah 2: Menukar token undangan menjadi profil kasir...');
+      const { error: claimError } = await supabase.rpc('claim_cashier_invite', {
+        p_token: token,
+        p_nama: formData.nama,
+        p_email: formData.email
+      });
 
-      if (profileError) {
-        console.error('Error saat insert profiles:', profileError);
-        throw new Error(`Gagal menyimpan profil kasir: ${profileError.message}`);
+      if (claimError) {
+        console.error('Error saat claim_cashier_invite:', claimError);
+        throw new Error(claimError.message || 'Gagal menyelesaikan pendaftaran kasir.');
       }
 
-      console.log('Pendaftaran kasir selesai.');
-      navigate('/cashier', { replace: true });
+      console.log('Pendaftaran kasir selesai, menunggu aktivasi Admin.');
+      setRegistered(true);
     } catch (err: any) {
       console.error('Terjadi kesalahan pada proses pendaftaran kasir:', err);
       setError(err.message || 'Pendaftaran gagal. Silakan coba lagi.');
@@ -69,12 +64,34 @@ export default function CashierRegister() {
     }
   };
 
-  if (!sellerId) {
+  if (!token) {
     return (
       <AuthLayout title="Link Tidak Valid" showBack={false}>
         <p className="text-white/80 text-center">
           Link undangan ini tidak lengkap. Minta link undangan baru dari Admin restoran Anda.
         </p>
+      </AuthLayout>
+    );
+  }
+
+  if (registered) {
+    return (
+      <AuthLayout title="Pendaftaran Berhasil" showBack={false}>
+        <div className="flex flex-col items-center text-center gap-4">
+          <div className="bg-white/20 text-white w-16 h-16 rounded-full flex items-center justify-center">
+            <CheckCircle2 size={32} />
+          </div>
+          <p className="text-white/80">
+            Akun Anda sudah dibuat. Untuk keamanan, akun kasir baru perlu diaktifkan dulu oleh
+            Admin restoran ini (di halaman Kelola Kasir) sebelum bisa dipakai login.
+          </p>
+          <Link
+            to="/cashier/login"
+            className="w-full bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold py-3 rounded-full hover:from-orange-600 hover:to-amber-600 transition text-center shadow-lg"
+          >
+            KE HALAMAN LOGIN
+          </Link>
+        </div>
       </AuthLayout>
     );
   }
@@ -125,7 +142,7 @@ export default function CashierRegister() {
           {isLoading ? (
             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
           ) : (
-            'DAFTAR & MASUK'
+            'DAFTAR SEKARANG'
           )}
         </button>
       </form>

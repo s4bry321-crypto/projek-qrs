@@ -14,64 +14,28 @@ export default function CartPage() {
     if (!tableNumber || cart.length === 0 || !slug) return;
     setIsSubmitting(true);
     try {
-      const { data: sellerData, error: sellerError } = await supabase
-        .from('sellers')
-        .select('id')
-        .eq('slug', slug)
-        .single();
-      if (sellerError || !sellerData) {
-        throw new Error("Restoran tidak ditemukan");
-      }
-      const sellerId = sellerData.id;
+      // Kirim cuma ID, jumlah, & catatan -- harga & nama TIDAK dikirim dari
+      // sini sama sekali. create_order() menghitung ulang harga tiap item
+      // dari tabel menu_items di server, jadi angka yang tersimpan (dan
+      // yang nanti ditagih kasir) selalu harga asli saat ini, bukan apapun
+      // yang ada di keranjang browser.
+      const { data, error: rpcError } = await supabase.rpc('create_order', {
+        p_seller_slug: slug,
+        p_nomor_meja: tableNumber,
+        p_items: cart.map(item => ({
+          menu_item_id: item.menu_id,
+          jumlah: item.jumlah,
+          catatan: item.catatan || null
+        }))
+      });
 
-      // Get table_id
-      const { data: tableData, error: tableError } = await supabase
-        .from('tables')
-        .select('id')
-        .eq('nomor_meja', tableNumber)
-        .eq('seller_id', sellerId)
-        .single();
-        
-      if (tableError || !tableData) {
-         throw new Error("Gagal memuat ID meja: " + (tableError?.message || "Tidak ditemukan"));
-      }
-      
-      const tableId = tableData.id;
-
-      // Create order
-      const { data: orderData, error: orderError } = await supabase.from('orders').insert({
-        seller_id: sellerId,
-        table_id: tableId,
-        status: 'baru',
-        total_harga: totalPrice
-      }).select().single();
-
-      if (orderError) throw orderError;
-
-      // Create order items
-      const orderItems = cart.map(item => ({
-        order_id: orderData.id,
-        menu_item_id: item.menu_id,
-        nama: item.nama,
-        harga: item.harga,
-        jumlah: item.jumlah,
-        catatan: item.catatan
-      }));
-
-      const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
-      
-      if (itemsError) {
-        console.error("Error inserting items:", itemsError);
-      }
-      
-      // Update table status to 'terisi'
-      await supabase.from('tables').update({ status: 'terisi' }).eq('id', tableId);
+      if (rpcError) throw rpcError;
 
       clearCart();
-      navigate(`/r/${slug}/order/${orderData.id}`);
-    } catch (error) {
+      navigate(`/r/${slug}/order/${data.order_id}`);
+    } catch (error: any) {
       console.error("Error placing order: ", error);
-      alert("Gagal mengirim pesanan. Silakan coba lagi.");
+      alert(error?.message || "Gagal mengirim pesanan. Silakan coba lagi.");
     } finally {
       setIsSubmitting(false);
     }

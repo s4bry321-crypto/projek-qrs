@@ -12,35 +12,28 @@ export default function OrderStatusPage() {
 
   useEffect(() => {
     if (!orderId) return;
+    let cancelled = false;
 
     const fetchOrder = async () => {
-      const { data: orderData } = await supabase
-        .from('orders')
-        .select('*, items:order_items(*), tables(nomor_meja)')
-        .eq('id', orderId)
-        .single();
-
-      if (orderData) {
-        const mappedOrder = {
-          ...orderData,
-          nomor_meja: (orderData as any).tables?.nomor_meja || '?'
-        };
-        setOrder(mappedOrder as Order);
+      const { data } = await supabase.rpc('get_order_status', { p_order_id: orderId });
+      if (cancelled) return;
+      if (data) {
+        setOrder({ ...data, nomor_meja: data.nomor_meja || '?' } as Order);
       }
       setLoading(false);
     };
 
     fetchOrder();
-
-    const orderSub = supabase
-      .channel(`order_${orderId}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `id=eq.${orderId}` }, () => {
-        fetchOrder();
-      })
-      .subscribe();
+    // Order ini punya akses tanpa login (link/order_id yang tidak bisa
+    // ditebak), jadi tidak ada sesi Supabase Auth yang bisa dipakai untuk
+    // membatasi langganan Realtime seperti dashboard Kasir/Admin. Di-poll
+    // tiap 5 detik sebagai gantinya -- cukup dekat dengan real-time untuk
+    // status pesanan yang biasanya berubah tiap beberapa menit.
+    const interval = setInterval(fetchOrder, 5000);
 
     return () => {
-      supabase.removeChannel(orderSub);
+      cancelled = true;
+      clearInterval(interval);
     };
   }, [orderId]);
 

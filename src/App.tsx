@@ -32,6 +32,8 @@ import AdminProfile from './pages/admin/AdminProfile';
 import AdminQR from './pages/admin/AdminQR';
 import AppHome from './pages/AppHome';
 import ResetPassword from './pages/ResetPassword';
+import NotFound from './pages/NotFound';
+import ErrorBoundary from './components/ErrorBoundary';
 
 const ProtectedRoute = ({ children, allowedRoles, redirectTo }: { children: React.ReactNode, allowedRoles: string[], redirectTo: string }) => {
   const { userProfile, loading } = useAuth();
@@ -39,6 +41,15 @@ const ProtectedRoute = ({ children, allowedRoles, redirectTo }: { children: Reac
   if (loading) return <div>Loading...</div>;
 
   if (!userProfile || !allowedRoles.includes(userProfile.role)) {
+    return <Navigate to={redirectTo} replace />;
+  }
+
+  // Akun kasir yang dinonaktifkan Admin diarahkan keluar begitu userProfile
+  // dimuat ulang (mis. buka lagi tab yang sudah lama terbuka), bukan cuma
+  // dicek sekali saat proses login saja. Ini pelengkap tampilan -- baris
+  // pertahanan yang sesungguhnya ada di kebijakan RLS (lihat schema.sql),
+  // yang menolak akses data sekalipun sesi login browser-nya masih valid.
+  if (userProfile.role === 'kasir' && userProfile.status === 'nonaktif') {
     return <Navigate to={redirectTo} replace />;
   }
 
@@ -67,6 +78,7 @@ const AdminProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 export default function App() {
   return (
+    <ErrorBoundary>
     <AuthProvider>
       <CartProvider>
         <BrowserRouter>
@@ -130,6 +142,9 @@ export default function App() {
                 </ProtectedRoute>
               } 
             />
+
+            {/* Halaman manapun yang tidak cocok dengan rute di atas */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </CartProvider>
@@ -152,5 +167,6 @@ export default function App() {
         v: {new Date(__BUILD_TIME__).toLocaleString('id-ID', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
       </div>
     </AuthProvider>
+    </ErrorBoundary>
   );
 }

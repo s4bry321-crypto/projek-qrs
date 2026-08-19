@@ -98,14 +98,14 @@ export default function AdminProfile() {
         </div>
       )}
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 max-w-lg space-y-6 mb-6">
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 max-w-lg space-y-6 mb-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Nama Restoran</label>
           <input
             type="text"
             value={namaRestoran}
             onChange={(e) => setNamaRestoran(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500"
           />
         </div>
 
@@ -134,16 +134,16 @@ export default function AdminProfile() {
         <button
           onClick={handleSave}
           disabled={isSaving}
-          className="flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-medium transition disabled:opacity-50"
+          className="flex items-center gap-2 px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white rounded-lg font-medium transition disabled:opacity-50"
         >
           {isSaving ? 'Menyimpan...' : <><Check size={16} /> Simpan Profil</>}
         </button>
       </div>
 
       {/* Ganti Password */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 max-w-lg">
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 max-w-lg">
         <h3 className="text-lg font-bold text-gray-900 mb-1 flex items-center gap-2">
-          <Lock size={18} className="text-orange-500" /> Ganti Password
+          <Lock size={18} className="text-sky-500" /> Ganti Password
         </h3>
         <p className="text-gray-500 text-sm mb-4">Ubah password akun Admin kamu.</p>
 
@@ -163,7 +163,7 @@ export default function AdminProfile() {
               minLength={6}
               required
               disabled={isChangingPassword}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500"
             />
           </div>
           <div>
@@ -175,7 +175,7 @@ export default function AdminProfile() {
               minLength={6}
               required
               disabled={isChangingPassword}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500"
             />
           </div>
           <button

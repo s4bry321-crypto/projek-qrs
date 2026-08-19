@@ -12,6 +12,7 @@ export default function ManageCashier() {
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [copied, setCopied] = useState(false);
   const [isResettingPw, setIsResettingPw] = useState<string | null>(null);
+  const [inviteToken, setInviteToken] = useState<string | null>(null);
 
   const handleResetPassword = async (cashier: UserProfile) => {
     if (!cashier.email) return;
@@ -34,6 +35,7 @@ export default function ManageCashier() {
 
   useEffect(() => {
     fetchCashiers();
+    fetchInviteToken();
   }, [userProfile]);
 
   const fetchCashiers = async () => {
@@ -53,8 +55,21 @@ export default function ManageCashier() {
     setLoading(false);
   };
 
-  const inviteLink = userProfile?.seller_id
-    ? `https://projek-qrs-umber.vercel.app/cashier/register?seller_id=${userProfile.seller_id}`
+  const fetchInviteToken = async () => {
+    if (!userProfile?.seller_id) return;
+    const { data } = await supabase
+      .from('cashier_invites')
+      .select('token')
+      .eq('seller_id', userProfile.seller_id)
+      .single();
+    if (data?.token) setInviteToken(data.token);
+  };
+
+  // Pakai token undangan (bukan seller_id polos) supaya link ini tidak bisa
+  // "ditebak" untuk restoran lain -- lihat catatan di schema.sql bagian
+  // PENDAFTARAN MANDIRI KASIR.
+  const inviteLink = inviteToken
+    ? `${window.location.origin}/cashier/register?token=${inviteToken}`
     : '';
 
   const handleCopyLink = async () => {
@@ -111,12 +126,15 @@ export default function ManageCashier() {
         </div>
       )}
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mb-8">
         <h3 className="text-lg font-bold text-gray-900 mb-2 flex items-center gap-2">
-          <LinkIcon size={18} className="text-orange-500" /> Link Undangan Kasir
+          <LinkIcon size={18} className="text-sky-500" /> Link Undangan Kasir
         </h3>
         <p className="text-gray-500 text-sm mb-4">
-          Kirim link ini ke calon kasir (lewat WhatsApp, dll). Mereka bisa daftar sendiri lewat link ini dan langsung bisa masuk ke dashboard kasir.
+          Kirim link ini ke calon kasir (lewat WhatsApp, dll). Mereka bisa daftar sendiri lewat link ini,
+          tapi akunnya akan berstatus <span className="font-medium text-gray-700">NONAKTIF</span> sampai
+          Anda mengaktifkannya lewat tombol &quot;Aktifkan&quot; di tabel bawah -- supaya bukan Anda saja
+          yang bisa memakai link ini untuk membuat akun kasir resto ini.
         </p>
         <div className="flex gap-2">
           <input
@@ -136,7 +154,7 @@ export default function ManageCashier() {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
