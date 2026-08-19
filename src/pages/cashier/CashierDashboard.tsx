@@ -2,8 +2,8 @@ import React, { useEffect, useState, useRef } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Order } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
-import { Bell, Printer, LogOut, Check, ArrowRight, Camera } from 'lucide-react';
-import { format } from 'date-fns';
+import { Bell, Printer, LogOut, Check, ArrowRight, Camera, Coins, PieChart, ClipboardCheck, Plus } from 'lucide-react';
+import { format, differenceInMinutes } from 'date-fns';
 import { uploadProfilAsset } from '../../lib/uploadImage';
 import { Capacitor } from '@capacitor/core';
 import { Share } from '@capacitor/share';
@@ -55,28 +55,32 @@ export default function CashierDashboard() {
     }
   };
 
-  useEffect(() => { if (!userProfile?.seller_id) return;
-    const fetchOrders = async () => {
-      const { data } = await supabase
-        .from('orders')
-        .select('*, items:order_items(*), tables(nomor_meja)')
-        .eq('seller_id', userProfile.seller_id)
-        .order('waktu', { ascending: false });
-      if (data) {
-        const mappedOrders = data.map((d: any) => ({
-           ...d,
-           nomor_meja: d.tables?.nomor_meja || '?'
-        }));
-        setOrders(mappedOrders as Order[]);
-        
-        setSelectedOrder(prev => {
-          if (!prev) return null;
-          const updated = mappedOrders.find(o => o.id === prev.id);
-          return updated ? (updated as Order) : null;
-        });
-      }
-    };
+  // Dipindah keluar dari useEffect (tanpa mengubah isinya sama sekali) supaya
+  // bisa juga dipanggil manual dari tombol FAB, bukan cuma otomatis lewat
+  // realtime subscription.
+  const fetchOrders = async () => {
+    if (!userProfile?.seller_id) return;
+    const { data } = await supabase
+      .from('orders')
+      .select('*, items:order_items(*), tables(nomor_meja)')
+      .eq('seller_id', userProfile.seller_id)
+      .order('waktu', { ascending: false });
+    if (data) {
+      const mappedOrders = data.map((d: any) => ({
+         ...d,
+         nomor_meja: d.tables?.nomor_meja || '?'
+      }));
+      setOrders(mappedOrders as Order[]);
+      
+      setSelectedOrder(prev => {
+        if (!prev) return null;
+        const updated = mappedOrders.find(o => o.id === prev.id);
+        return updated ? (updated as Order) : null;
+      });
+    }
+  };
 
+  useEffect(() => { if (!userProfile?.seller_id) return;
     fetchOrders();
 
     const channel = supabase
@@ -185,8 +189,34 @@ export default function CashierDashboard() {
     }
   };
 
+  // --- Nilai turunan untuk 3 kotak statistik (dihitung langsung dari state
+  // `orders` yang sudah ada, BUKAN query Supabase baru). Karena skema saat
+  // ini tidak menyimpan batas waktu "shift", Pendapatan Shift = total semua
+  // pesanan yang sudah dibayar pada data yang sedang dimuat.
+  const pendapatanShift = orders
+    .filter(o => o.status === 'dibayar')
+    .reduce((sum, o) => sum + (o.total_harga || 0), 0);
+  const pesananProsesCount = orders.filter(o => o.status === 'baru' || o.status === 'diproses').length;
+  const pesananSelesaiCount = orders.filter(o => o.status === 'selesai' || o.status === 'dibayar').length;
+
+  const getElapsedLabel = (waktu?: string) => {
+    if (!waktu) return '-';
+    const mnt = differenceInMinutes(new Date(), new Date(waktu));
+    if (mnt < 1) return 'Baru saja';
+    if (mnt < 60) return `${mnt} mnt`;
+    return `${Math.floor(mnt / 60)} jam`;
+  };
+
+  const statusPillClass = (status: string) => {
+    switch (status) {
+      case 'baru': return 'bg-purple-100 text-purple-700';
+      case 'diproses': return 'bg-blue-100 text-blue-700';
+      default: return 'bg-teal-100 text-teal-700';
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col">
       <header 
         className="bg-white shadow-sm px-6 py-4 flex justify-between items-center print:hidden"
         style={{ paddingTop: 'calc(env(safe-area-inset-top) + 1rem)' }}
@@ -205,7 +235,7 @@ export default function CashierDashboard() {
             <button
               onClick={() => photoInputRef.current?.click()}
               disabled={isUploadingPhoto}
-              className="absolute -bottom-1 -right-1 w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition disabled:opacity-100"
+              className="absolute -bottom-1 -right-1 w-5 h-5 bg-indigo-500 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition disabled:opacity-100"
               title="Ganti foto profil"
             >
               <Camera size={11} />
@@ -223,41 +253,60 @@ export default function CashierDashboard() {
         </button>
       </header>
 
-      <main className="flex-1 p-6 grid grid-cols-1 lg:grid-cols-3 gap-6 print:hidden">
-        {/* Kolom Daftar Pesanan */}
-        <div className="lg:col-span-1 bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col max-h-[calc(100vh-8rem)]">
-          <div className="p-4 border-b border-gray-200 bg-gray-50 rounded-t-xl">
-            <h2 className="font-bold text-gray-800 flex items-center gap-2">
-              <Bell size={18} className={`text-orange-500 ${showNewOrderBanner ? 'animate-bounce' : ''}`} /> Pesanan Aktif
-            </h2>
+      <main className="flex-1 px-4 py-5 max-w-2xl w-full mx-auto print:hidden">
+        {/* Statistik */}
+        <div className="grid grid-cols-3 gap-3 mb-6">
+          <div className="bg-indigo-50 rounded-2xl p-3">
+            <div className="flex items-center gap-1.5 text-indigo-500 mb-2">
+              <Coins size={16} />
+              <span className="text-xs font-medium text-gray-700 leading-tight">Pendapatan Shift</span>
+            </div>
+            <p className="text-lg font-bold text-gray-900">Rp {pendapatanShift.toLocaleString('id-ID')}</p>
           </div>
+          <div className="bg-indigo-50 rounded-2xl p-3">
+            <div className="flex items-center gap-1.5 text-indigo-500 mb-2">
+              <PieChart size={16} />
+              <span className="text-xs font-medium text-gray-700 leading-tight">Pesanan Proses</span>
+            </div>
+            <p className="text-lg font-bold text-gray-900">{pesananProsesCount}</p>
+          </div>
+          <div className="bg-indigo-50 rounded-2xl p-3">
+            <div className="flex items-center gap-1.5 text-indigo-500 mb-2">
+              <ClipboardCheck size={16} />
+              <span className="text-xs font-medium text-gray-700 leading-tight">Pesanan Selesai</span>
+            </div>
+            <p className="text-lg font-bold text-gray-900">{pesananSelesaiCount}</p>
+          </div>
+        </div>
+
+        {/* Daftar Pesanan Aktif (gaya tiket) */}
+        <div className="bg-gray-50 rounded-2xl p-4 mb-6">
+          <h2 className="font-bold text-gray-900 flex items-center gap-2 mb-3">
+            <Bell size={18} className={`text-orange-500 ${showNewOrderBanner ? 'animate-bounce' : ''}`} /> Pesanan Aktif
+          </h2>
+
           {showNewOrderBanner && (
-            <div className="mx-3 mt-3 p-3 rounded-lg bg-orange-100 text-orange-800 text-sm font-medium text-center animate-pulse">
+            <div className="mb-3 p-3 rounded-lg bg-orange-100 text-orange-800 text-sm font-medium text-center animate-pulse">
               🔔 Pesanan baru masuk!
             </div>
           )}
-          <div className="flex-1 overflow-y-auto p-2 space-y-2">
+
+          <div className="space-y-3">
             {orders.filter(o => o.status !== 'dibayar').map(order => (
-              <div 
-                key={order.id} 
+              <div
+                key={order.id}
                 onClick={() => setSelectedOrder(order)}
-                className={`p-4 rounded-lg cursor-pointer border transition-colors ${
-                  selectedOrder?.id === order.id ? 'border-orange-500 bg-orange-50' : 'border-gray-100 hover:bg-gray-50'
+                className={`p-4 rounded-2xl cursor-pointer border-2 border-dashed bg-white shadow-sm transition-colors flex items-center justify-between gap-2 flex-wrap ${
+                  selectedOrder?.id === order.id ? 'border-indigo-400' : 'border-gray-300 hover:border-indigo-300'
                 }`}
               >
-                <div className="flex justify-between items-start mb-2">
-                  <span className="font-bold text-lg">Meja {order.nomor_meja}</span>
-                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                    order.status === 'baru' ? 'bg-blue-100 text-blue-700' :
-                    order.status === 'diproses' ? 'bg-orange-100 text-orange-700' :
-                    'bg-green-100 text-green-700'
-                  }`}>
-                    {order.status.toUpperCase()}
+                <span className="font-extrabold text-xl text-gray-900">Meja {order.nomor_meja}</span>
+                <div className="flex items-center gap-3 text-sm">
+                  <span className={`px-3 py-1 rounded-full font-semibold ${statusPillClass(order.status)}`}>
+                    {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                   </span>
-                </div>
-                <div className="flex justify-between items-center text-sm text-gray-500">
-                  <span>{order.items?.length || 0} Item</span>
-                  <span>Rp {order.total_harga.toLocaleString('id-ID')}</span>
+                  <span className="text-gray-500">{getElapsedLabel(order.waktu)}</span>
+                  <span className="text-gray-500">{order.items?.length || 0} Item</span>
                 </div>
               </div>
             ))}
@@ -267,21 +316,22 @@ export default function CashierDashboard() {
           </div>
         </div>
 
-        {/* Kolom Detail Pesanan */}
-        <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col">
+        {/* Detail Pesanan - tampil di bawah daftar (bukan di samping), sesuai
+            layout satu kolom untuk layar sempit */}
+        <div className="bg-gray-50 rounded-2xl p-4 min-h-[16rem] flex flex-col">
           {selectedOrder ? (
             <>
-              <div className="flex justify-between items-start mb-6">
+              <div className="flex justify-between items-start mb-6 flex-wrap gap-3">
                 <div>
                   <h2 className="text-2xl font-bold text-gray-900">Meja {selectedOrder.nomor_meja}</h2>
                   <p className="text-gray-500 text-sm">
                     {selectedOrder.waktu ? format(new Date(selectedOrder.waktu), 'dd MMM yyyy, HH:mm') : 'Waktu tidak diketahui'}
                   </p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap">
                   <button 
                     onClick={handlePrint}
-                    className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition"
+                    className="flex items-center gap-2 bg-white hover:bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium transition border border-gray-200"
                   >
                     <Printer size={18} /> {Capacitor.isNativePlatform() ? 'Bagikan / Cetak Struk' : 'Cetak Struk'}
                   </button>
@@ -291,19 +341,19 @@ export default function CashierDashboard() {
                     </button>
                   )}
                   {selectedOrder.status === 'diproses' && (
-                    <button onClick={() => updateStatus(selectedOrder.id, 'selesai')} className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium transition">
+                    <button onClick={() => updateStatus(selectedOrder.id, 'selesai')} className="flex items-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium transition">
                       Siap <Check size={18} />
                     </button>
                   )}
                   {selectedOrder.status === 'selesai' && (
-                    <button onClick={() => updateStatus(selectedOrder.id, 'dibayar')} className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium transition">
+                    <button onClick={() => updateStatus(selectedOrder.id, 'dibayar')} className="flex items-center gap-2 bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-lg font-medium transition">
                       Tandai Sudah Dibayar <Check size={18} />
                     </button>
                   )}
                 </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto mb-6">
+              <div className="flex-1 overflow-y-auto mb-6 -mx-1 px-1">
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="border-b border-gray-200 text-gray-500 text-sm">
@@ -335,12 +385,23 @@ export default function CashierDashboard() {
               </div>
             </>
           ) : (
-            <div className="flex-1 flex items-center justify-center text-gray-400">
-              Pilih pesanan di samping untuk melihat detail.
+            <div className="flex-1 flex items-center justify-center text-center text-gray-400 px-6 py-10">
+              ☕ Klik pada salah satu pesanan aktif di atas untuk melihat detail lengkap, riwayat, dan instruksi dapur. ☕
             </div>
           )}
         </div>
       </main>
+
+      {/* Tombol FAB - refresh manual daftar pesanan (memanggil ulang fetchOrders
+          yang sama persis, cuma sekarang bisa dipicu manual juga) */}
+      <button
+        onClick={fetchOrders}
+        className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 text-white shadow-lg flex items-center justify-center hover:opacity-90 active:scale-95 transition print:hidden"
+        style={{ marginBottom: 'env(safe-area-inset-bottom)' }}
+        aria-label="Muat ulang pesanan"
+      >
+        <Plus size={26} />
+      </button>
 
       {/* Tampilan Struk Khusus Print */}
       {selectedOrder && (
