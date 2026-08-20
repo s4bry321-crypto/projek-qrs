@@ -216,9 +216,9 @@ export default function CashierDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="h-screen bg-white flex flex-col overflow-hidden">
       <header 
-        className="bg-white shadow-sm px-6 py-4 flex justify-between items-center print:hidden"
+        className="bg-white shadow-sm px-6 py-4 flex justify-between items-center print:hidden shrink-0"
         style={{ paddingTop: 'calc(env(safe-area-inset-top) + 1rem)' }}
       >
         <div className="flex items-center gap-3">
@@ -253,9 +253,9 @@ export default function CashierDashboard() {
         </button>
       </header>
 
-      <main className="flex-1 px-4 py-5 max-w-2xl w-full mx-auto print:hidden">
+      <main className="flex-1 min-h-0 flex flex-col overflow-hidden px-4 py-5 max-w-2xl w-full mx-auto print:hidden">
         {/* Statistik */}
-        <div className="grid grid-cols-3 gap-3 mb-6">
+        <div className="grid grid-cols-3 gap-3 mb-6 shrink-0">
           <div className="bg-indigo-50 rounded-2xl p-3">
             <div className="flex items-center gap-1.5 text-indigo-500 mb-2">
               <Coins size={16} />
@@ -280,7 +280,7 @@ export default function CashierDashboard() {
         </div>
 
         {/* Daftar Pesanan Aktif (gaya tiket) */}
-        <div className="bg-gray-50 rounded-2xl p-4 mb-6">
+        <div className="bg-gray-50 rounded-2xl p-4 mb-6 flex-1 overflow-y-auto min-h-0">
           <h2 className="font-bold text-gray-900 flex items-center gap-2 mb-3">
             <Bell size={18} className={`text-orange-500 ${showNewOrderBanner ? 'animate-bounce' : ''}`} /> Pesanan Aktif
           </h2>
@@ -396,7 +396,7 @@ export default function CashierDashboard() {
           yang sama persis, cuma sekarang bisa dipicu manual juga) */}
       <button
         onClick={fetchOrders}
-        className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 text-white shadow-lg flex items-center justify-center hover:opacity-90 active:scale-95 transition print:hidden"
+        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 text-white shadow-lg flex items-center justify-center hover:opacity-90 active:scale-95 transition print:hidden"
         style={{ marginBottom: 'env(safe-area-inset-bottom)' }}
         aria-label="Muat ulang pesanan"
       >
